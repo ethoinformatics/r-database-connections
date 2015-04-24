@@ -70,7 +70,9 @@ Then run `make install` as to install the libraries and programs to the `/usr/lo
 
 This installs a set of lib files into `/usr/local/lib` and the necessary MDB Tools binary files into `/usr/local/bin`.
 
-## 3. In your R installation (e.g., in `RStudio`), install the package `Hmisc` and load it. [Documentation](http://cran.r-project.org/web/packages/Hmisc/Hmisc.pdf) for `Hmisc`
+## 3. In your R installation (e.g., in `RStudio`), install the package `Hmisc` and load it.
+
+[documentation](http://cran.r-project.org/web/packages/Hmisc/Hmisc.pdf) for `Hmisc`
 
 	> install.package("Hmisc")
 	> library(Hmisc)
@@ -81,7 +83,17 @@ You should now be able to connect to an .mdb database using
 
 The following script, for example, would let you connect to a database named `test.mdb` located on the desktop. Note: the name of your database cannot have spaces in it.
 
-	> db <- mdb.get("~/Desktop/test.mdb")
+	> # To read all tables in the database
+	> filename <- "~/Desktop/test.mdb"
+	> db <- mdb.get(filename)
 	> 
+	> # To print the names of tables in the database
+	> mdb.get(filename, tables=TRUE)
+	>
+	> # To import one table, named "observer"
+	> dbtable <- mdb.get(filename, tables='observer')
+	>
+	> # To import several tables
+	> db <- mdb.get(filename, tables=c('observer','contacts')
 
-This method reads newline characters!
+Note that the function `mdb.get` reads the data in the tables as CSV data. It can deal with carriage returns in text fields in the database and reads these as newline characters.
