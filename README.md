@@ -14,13 +14,13 @@ Connecting to different databases from R on Mac OS
 
 To do this, follow these instructions:
 
-First, make sure you have reasonably current installations of:
+- First, make sure you have current installations of:
 
 	libtool
 	automake
 	autoconf
 
-You can use `homebrew` to install these...
+- You can use `homebrew` to install these...
 
 	$ brew install libtool
 	$ brew install autoconf
@@ -43,3 +43,8 @@ above).
 If you want to build `man` pages, you'll need `txt2man`.
 
 	$ brew install txt2man
+
+You also need to install `pkg-config` and `gnome-doc-utils`.
+
+	$ brew install pkg-config
+	$ brew install gnome-doc-utils
