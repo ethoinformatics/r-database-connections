@@ -78,8 +78,11 @@ This installs a set of lib files into `/usr/local/lib` and the necessary MDB Too
 
 	> mdb.get(filename)
 
+### EXAMPLE
+
 The following example `R` script lets you connect to a database named `test.mdb` located on the desktop. Note: the name of your database cannot have spaces in it.
 
+	> library(Hmisc)
 	> # To read all tables in the database
 	> filename <- "~/Desktop/test.mdb"
 	> db <- mdb.get(filename)
