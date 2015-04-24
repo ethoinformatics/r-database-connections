@@ -7,7 +7,7 @@
 
 `homebrew` installs packages to their own directory inside `/usr/local/Cellar` and then symlinks their files into `/usr/local`
 
-## 2. Install `mdb-tools` [github.com/brianb/mdbtools](http://github.com/brianb/mdbtools)
+## 2. Install and compile `mdb-tools` [github.com/brianb/mdbtools](http://github.com/brianb/mdbtools)
 
 To do this, follow these instructions:
 
@@ -67,18 +67,18 @@ Then run `make install` as to install the libraries and programs to the `/usr/lo
 
 This installs a set of lib files into `/usr/local/lib` and the necessary MDB Tools binary files into `/usr/local/bin`.
 
-## 3. In your R installation (e.g., in `RStudio`), install the package `Hmisc` and load it.
+## 3. In your `R` installation (e.g., in `RStudio`), install the package `Hmisc` and load it.
 
-[documentation](http://cran.r-project.org/web/packages/Hmisc/Hmisc.pdf) for `Hmisc`
+[DOCUMENTATION](http://cran.r-project.org/web/packages/Hmisc/Hmisc.pdf) for `Hmisc`
 
 	> install.package("Hmisc")
 	> library(Hmisc)
 
-You should now be able to connect to an .mdb database using
+## 4. Connect to an .mdb database from `R` with the command `mdb.get`.
 
 	> mdb.get(filename)
 
-The following `R` script, for example, would let you connect to a database named `test.mdb` located on the desktop. Note: the name of your database cannot have spaces in it.
+The following example `R` script lets you connect to a database named `test.mdb` located on the desktop. Note: the name of your database cannot have spaces in it.
 
 	> # To read all tables in the database
 	> filename <- "~/Desktop/test.mdb"
