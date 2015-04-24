@@ -29,8 +29,9 @@ The following example `R` script lets you connect to a database that you have re
 	> df <- sqlFetch(conn,dbtables$TABLE_NAME)
 	>
 	> # To query a table and return contents into a dataframe
-	> sql <-paste("select * from '", dbtables$TABLE_NAME, "'", sep="")
+	> sql <-paste("select * from `", dbtables$TABLE_NAME, "`", sep="")
 	> dbquery <- sqlQuery(conn, sql)
-	> 
+	> # Note: be careful with quotations in query structure 
+	>
 	> # To close the connection
 	> close(conn)
