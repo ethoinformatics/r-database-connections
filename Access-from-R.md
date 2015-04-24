@@ -1,7 +1,4 @@
-# r-database-connections
-Connecting to different databases from R on Mac OS
-
-#Connect to an MS Access .mdb database
+#Connect to an MS Access .mdb database from `R` on Mac OSX
 
 ## 1. Install `homebrew` [brew.sh/](http://brew.sh/)
 
@@ -81,7 +78,7 @@ You should now be able to connect to an .mdb database using
 
 	> mdb.get(filename)
 
-The following script, for example, would let you connect to a database named `test.mdb` located on the desktop. Note: the name of your database cannot have spaces in it.
+The following `R` script, for example, would let you connect to a database named `test.mdb` located on the desktop. Note: the name of your database cannot have spaces in it.
 
 	> # To read all tables in the database
 	> filename <- "~/Desktop/test.mdb"
