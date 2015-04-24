@@ -20,7 +20,7 @@
 
 Here, `dsn` is the name of a registered DSN, `uid` is a user ID, and `pwd` is a password to the database, if these are needed.
 
-###EXAMPLE
+### EXAMPLE
 
 The following example `R` script lets you connect to a database that you have registered in the `ODBC Data Source Administrator` as `test`.
 
