@@ -6,3 +6,10 @@
 - You cannot edit or query these databases, but you can dump them to other formats, including CSV, MySQL, PostgreSQL, Oracle, Sybase, and SQLite
 
 > Use this tool to dump the following tables: observer samples, avistajes, focal data, focal samples, biological samples
+
+#On Windows
+## [Bullzip](http://www.bullzip.com/download.php)
+- Several applications that will convert MS Access databases to other formats
+- [Access to MySQL](http://www.bullzip.com/products/a2m/info.php)
+- [Access to PostgreSQL](http://www.bullzip.com/products/a2p/info.php)
+- [Access to Microsoft SQL](http://www.bullzip.com/products/a2s/info.php)
