@@ -14,13 +14,13 @@ Connecting to different databases from R on Mac OS
 
 To do this, follow these instructions:
 
-- First, make sure you have current installations of:
+First, make sure you have current installations of:
 
 	libtool
 	automake
 	autoconf
 
-- You can use `homebrew` to install these...
+You can use `homebrew` to install these...
 
 	$ brew install libtool
 	$ brew install autoconf
@@ -48,3 +48,37 @@ You also need to install `pkg-config` and `gnome-doc-utils`.
 
 	$ brew install pkg-config
 	$ brew install gnome-doc-utils
+
+Next, download and unzip the latest version of the `mdbtools-master.zip` repo from GitHub [https://github.com/brianb/mdbtools](http://github.com/brianb/mdbtools), then `cd` into that directory and run `autoreconf`. I unzipped the repo in my `Downloads` folder.
+
+	$ cd ~/Downloads/mdbtools-master
+	$ autoreconf -i -f
+	
+Now, run `configure`.
+
+	$ ./configure --with-unixodbc=/usr/local
+
+If that is successful, run `make` to create the `mdbtools` C programs and the needed libraries.
+
+	$ make
+
+Once MDB Tools has been compiled, the generated library folders will be in the `src/libmdb` directory inside of your `mdbtools-master` folder and the utility programs will be in the `src/util` directory inside of `mdbtools-master` folder.
+
+Then run `make install` as to install the libraries and programs to the `/usr/local` directory by default.
+
+	$ make install
+
+This installs a set of lib files into `/usr/local/lib` and the necessary MDB Tools binary files into `/usr/local/bin`.
+
+## 3. In your R installation (e.g., in `RStudio`), install the package `Hmisc` and load it.
+
+	> install.package("Hmisc")
+	> library(Hmisc)
+
+You should now be able to connect to an .mdb database using
+
+	> mdb.get(filename)
+
+> d <- mdb.get("~/Desktop/Proyecto_Primates.mdb") # cannot have spaces in name
+
+This method reads newline characters!
