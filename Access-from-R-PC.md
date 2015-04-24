@@ -26,7 +26,10 @@ The following example `R` script lets you connect to a database that you have re
 
 	> library(RODBC)
 	> dsn <- "test"
+	> 
+	> # To connect to the database
 	> conn <-odbcConnect(dsn, uid="", pwd="")
+	>
 	> # To list the names of the tables in your database
 	> dbtables <- sqlTables(conn, tableType="TABLE")
 	>
