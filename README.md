@@ -1,7 +1,7 @@
 # r-database-connections
-connecting to different databases from r
+Connecting to different databases from R on Mac OS
 
-#CONNECT TO AN MS ACCESS .MDB DATABASE FROM R ON MAC OS
+#Connect to an MS Access .mdb database
 
 ## 1. Install `homebrew` [brew.sh/](http://brew.sh/)
 
