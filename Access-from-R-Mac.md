@@ -100,4 +100,4 @@ The following example `R` script lets you connect to a database named `test.mdb`
 Note that the function `mdb.get` reads the data in the tables as CSV data. It can deal with carriage returns in text fields in the database and reads these as newline characters.
 
 ### HELPFUL LINKS
-[mdb-tools-for-mac] (http://web.stanford.edu/~cengel/cgi-bin/anthrospace/mdb-tools-for-mac-105/comment-page-1)
+[Read data from MS Access into R] (http://web.stanford.edu/~cengel/cgi-bin/anthrospace/mdb-tools-for-mac-105/comment-page-1)
