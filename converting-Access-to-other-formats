@@ -1,0 +1,6 @@
+## Step 1 - convert MS Access DB to another format
+##Tools
+###MDBDecode.app
+- A Mac OS X application that will let you open and view MS Access .mdb and .accdb databases
+- Cannot edit or query these databases, but can dump them to other formats, including CSV, MySQL, PostgreSQL, Oracle, Sybase, and SQLite
+- Use this tool to dump the following tables: observer samples, avistajes, 
