@@ -70,7 +70,7 @@ Then run `make install` as to install the libraries and programs to the `/usr/lo
 
 This installs a set of lib files into `/usr/local/lib` and the necessary MDB Tools binary files into `/usr/local/bin`.
 
-## 3. In your R installation (e.g., in `RStudio`), install the package `Hmisc` and load it.
+## 3. In your R installation (e.g., in `RStudio`), install the package `Hmisc` and load it. [Documentation](http://cran.r-project.org/web/packages/Hmisc/Hmisc.pdf) for `Hmisc`
 
 	> install.package("Hmisc")
 	> library(Hmisc)
