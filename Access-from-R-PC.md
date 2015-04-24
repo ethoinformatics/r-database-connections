@@ -1,6 +1,6 @@
-#Connect to an MS Access .mdb database from `R` on Windows 8 OS
+#Connect to an MS Access .mdb database from `R` on Windows 8
 
-## 1. Register your database in the ODBC Data Source Administrator
+## 1. Register your database in the `ODBC Data Source Administrator`
 
 - If you have Windows 8.1, click on the Start button and select `Control Panels`, then select `Administrative Tools`. Under `Administrative Tools`, double-click on `ODBC Data Sources` (32 or 64 bit, depending on your machine) to open the `ODBC Data Source Administrator`.
 - In the `ODBC Data Source Administrator`, choose `Add` and select the appropriate driver from the list. `Choose Microsoft Access Driver (*.mdb, *.accdb)` to read from an MS Access database. Then click on `Finish`.
@@ -14,23 +14,23 @@
 	> install.package("RODBC")
 	> library(RODBC)
 
-## 3. Connect to an .mdb database from `R` with the command `mdb.get`.
+## 3. Set up a connection to an .mdb database from `R` with the command `odbcConnect`, where `dsn` is the name of a registered DSN, `uid` is a user ID, and `pwd` is a password to the database, if these are needed.
 
-	> mdb.get(filename)
+	> conn < odbcConnect(dsn, uid="", pwd="")
 
-The following example `R` script lets you connect to a database named `test.mdb` located on the desktop. Note: the name of your database cannot have spaces in it.
+The following example `R` script lets you connect to a database that you have registered in the `ODBC Data Source Administrator` as `test`.
 
-	> # To read all tables in the database
-	> filename <- "~/Desktop/test.mdb"
-	> db <- mdb.get(filename)
+	> dsn <- "test"
+	> conn <-odbcConnect(dsn, uid="", pwd="")
+	> # To list the names of the tables in your database
+	> dbtables <- sqlTables(conn, tableType="TABLE")
+	>
+	> # To read the contents of a table into a dataframe
+	> df <- sqlFetch(conn,dbtables$TABLE_NAME)
+	>
+	> # To query a table and return contents into a dataframe
+	> sql <-paste("select * from '", dbtables$TABLE_NAME, "'", sep="")
+	> dbquery <- sqlQuery(conn, sql)
 	> 
-	> # To print the names of tables in the database
-	> mdb.get(filename, tables=TRUE)
-	>
-	> # To import one table, named "observer"
-	> dbtable <- mdb.get(filename, tables='observer')
-	>
-	> # To import several tables
-	> db <- mdb.get(filename, tables=c('observer','contacts')
-
-Note that the function `mdb.get` reads the data in the tables as CSV data. It can deal with carriage returns in text fields in the database and reads these as newline characters.
+	> # To close the connection
+	> close(conn)
