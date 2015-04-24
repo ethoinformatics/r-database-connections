@@ -25,3 +25,21 @@ You can use `homebrew` to install these...
 	$ brew install libtool
 	$ brew install autoconf
 	$ brew install automake
+
+Second, you need a current installation of `glib`.
+
+	$ brew install glib
+
+If you want to build the SQL engine for use in `mdbtools`, you'll also need `bison` or `byacc`, and `flex`.
+
+	$ brew install bison
+	$ brew install flex
+
+If you want to build the ODBC driver for use in `mdbtools`, you'll need `unixodbc` (version 2.2.10 or
+above).
+
+	$ brew install unixodbc
+
+If you want to build `man` pages, you'll need `txt2man`.
+
+	$ brew install txt2man
