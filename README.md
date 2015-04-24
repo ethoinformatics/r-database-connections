@@ -79,6 +79,9 @@ You should now be able to connect to an .mdb database using
 
 	> mdb.get(filename)
 
-> d <- mdb.get("~/Desktop/Proyecto_Primates.mdb") # cannot have spaces in name
+The following script, for example, would let you connect to a database named `test.mdb` located on the desktop. Note: the name of your database cannot have spaces in it.
+
+	> db <- mdb.get("~/Desktop/test.mdb")
+	> 
 
 This method reads newline characters!
