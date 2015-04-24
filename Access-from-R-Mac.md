@@ -101,3 +101,5 @@ Note that the function `mdb.get` reads the data in the tables as CSV data. It ca
 
 ### HELPFUL LINKS
 [Read data from MS Access into R] (http://web.stanford.edu/~cengel/cgi-bin/anthrospace/mdb-tools-for-mac-105/comment-page-1)
+[MDB Tools Info](http://mdbtools.sourceforge.net/)
+[MDB Tools GitHub](http://github.com/brianb/mdbtools)
