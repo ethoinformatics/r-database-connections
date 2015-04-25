@@ -16,31 +16,26 @@ Open R
 
 	> library(RMySQL)
 	> conn <- dbConnect(MySQL(), user = 'root', password = 'root', host = 'localhost', unix.socket = '/Applications/MAMP/tmp/mysql/mysql.sock', port = 8889, dbname='pp')
-	> # To list tables in the database
+	> # To get a list tables in the database
 	> dbListTables(conn)
-	> 
-	> # To rename the tables in the database, replacing spaces and dashes with underscores, and sort alphabetically
+
+For SQL queries to work well from R, the table names in MySQL should not have spaces. The routine below reads the list of tables from the database, converts spaces and dashes to underscores, and then runs the SQL command `RENAME` on those tables that whose name should change.
+
 	> dbtables$original <- dbListTables(conn)
 	> dbtables$updated <- gsub(" ", "_", dbtables$original)
-	> dbtables$updated <- gsub(" ", "-", dbtables$updated
+	> dbtables$updated <- gsub("-", "_", dbtables$updated)
 	> dbtables <- as.data.frame(dbtables)
 	> dbtables <- dbtables[order(dbtables$original),]
 	>
-	> SQL <- NULL
 	> for (i in 1:nrow(dbtables)) {
-	>		SQL[i]<- paste("RENAME TABLE `", dbtables[i,1],"` TO `", dbtables[i,2],"`", sep="")
-	>		dbSendQuery(con, SQL[i])
-	>	}
-
-
-
-SQL <- NULL
-for (i in 1:nrow(table_list)) {
-  SQL[i]<- paste("RENAME TABLE `", table_list[i,1],"` TO `", table_list[i,2],"`", sep="")
-}
-for (i in 9:71){
-  dbSendQuery(con, SQL[i])
-}
+		dbtables$oldname[i]<- dbExistsTable(con, as.character(dbtables[i,1]))
+		dbtables$newname[i]<- dbExistsTable(con, as.character(dbtables[i,2]))
+		if (dbtables$newname[i] == FALSE) {
+			SQL[i]<- paste("RENAME TABLE `", dbtables$original[i],"` TO `", dbtables$updated[i],"`", sep="")
+			dbSendQuery(con, SQL[i])
+		}
+	> }
+	
 
 SQLite
 
