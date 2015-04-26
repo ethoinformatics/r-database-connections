@@ -9,7 +9,7 @@ There are several R libraries that all you to connect to SQL databases from R
 
 #EXAMPLE
 
-* Connecting to a MySQL database named `pp` running in a local MAMP installation (localhost, on port 8889)
+**Connecting to a MySQL database named `pp` running in a local MAMP installation (localhost, on port 8889)**
 
 First, start MAMP and your MySQL and Apache servers, then open `R` and use the following:
 
