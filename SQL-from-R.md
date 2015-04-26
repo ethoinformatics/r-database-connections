@@ -55,7 +55,7 @@ To read a table from a MySQL database into R:
 	> # To read in a second table called "avistajes"
 	> av <- dbReadTable(conn, "avistajes")
 
-* Joins among related tables
+**Joins among related tables**
 
 In the `pp` database, `observer_samples` and `avistajes` are joined by a primary key-foreign key relationship. The primary key in the `observer_sample` table is used as a foreign key in `avistajes` to link each `avistaje` to a single `observer_sample`. We can build a "join table" with information from `observer_samples` and `avistajes` in two ways, by running a JOIN query on the MySQL database from `R` or by using the `merge` function in `R`.
 
@@ -70,6 +70,7 @@ In the `pp` database, `observer_samples` and `avistajes` are joined by a primary
 Once queries are completed, close the connection to the database.
 
 	> dbDisconnect(conn)
+
 
 SQLite
 
