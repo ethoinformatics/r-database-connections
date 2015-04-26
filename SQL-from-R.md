@@ -35,8 +35,30 @@ For SQL queries to work well from R, the table names in MySQL should not have sp
 			dbSendQuery(con, SQL[i])
 		}
 	> }
+	> # To create a list with names of new table in MySQL
+	> t <- dbListTables(conn)
+	> 
+	> # ... and this is equivalent, but is not connecting to MySQL 
+	> t <- dbtables$updated
 	
+To read a table from a MySQL database into R...
+	> # Generically...
+	> # df <- dbReadTable(con, MySQLTableName)
+	> # So... if there is a table in the MySQL database named "observer_samples"...
+	> os <- dbReadTable(con, "observer_samples")
+	> # To read in a second table
+	> av <- dbReadTable(con, "avistajes")
 
+In the `pp` database, `observer_samples` and `avistajes` are joined by a primary key-foreign key relationship. The primary key in the `observer_sample` table is used as a foreign key in `avistajes` to link each `avistaje` to a single `observer_sample`. We can build a "join table" with information from `observer_samples` and `avistajes` in two ways, by running a JOIN query on the MySQL database from `R` or by using the `merge` function in `R`.
+
+	> # Joining via SQL, using WHERE to indicate the field(s) to JOIN on
+	> osav_join <- dbGetQuery(con, "SELECT * FROM `observer_samples` JOIN `avistajes` WHERE `observer_samples`.`Obs Sample ID` = `avistajes`.`Obs Sample ID`")
+	>
+	> # Joining dataframes in R
+	> osav_join <- merge(os, av, by = "Obs.Sample.ID")
+	> 
+	> # Note tha in the SQL version, you can choose particular fields to come from the left hand table
+	
 SQLite
 
 
