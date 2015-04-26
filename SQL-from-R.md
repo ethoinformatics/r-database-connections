@@ -47,7 +47,7 @@ To create a list of the new table names in MySQL:
 To read a table from a MySQL database into R:
 
 	> # Generically...
-	> # df <- dbReadTable(con, MySQLTableName)
+	> # df <- dbReadTable(conn, MySQLTableName)
 	> 
 	> # So... if there is a table in the MySQL database named "observer_samples"...
 	> os <- dbReadTable(conn, "observer_samples")
@@ -60,7 +60,7 @@ To read a table from a MySQL database into R:
 In the `pp` database, `observer_samples` and `avistajes` are joined by a primary key-foreign key relationship. The primary key in the `observer_sample` table is used as a foreign key in `avistajes` to link each `avistaje` to a single `observer_sample`. We can build a "join table" with information from `observer_samples` and `avistajes` in two ways, by running a JOIN query on the MySQL database from `R` or by using the `merge` function in `R`.
 
 	> # Joining via SQL, using WHERE to indicate the field(s) to JOIN on
-	> osav_join <- dbGetQuery(con, "SELECT * FROM `observer_samples` JOIN `avistajes` WHERE `observer_samples`.`Obs Sample ID` = `avistajes`.`Obs Sample ID`")
+	> osav_join <- dbGetQuery(conn, "SELECT * FROM `observer_samples` JOIN `avistajes` WHERE `observer_samples`.`Obs Sample ID` = `avistajes`.`Obs Sample ID`")
 	>
 	> # Joining dataframes in R
 	> osav_join <- merge(os, av, by = "Obs.Sample.ID")
