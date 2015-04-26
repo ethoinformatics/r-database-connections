@@ -22,18 +22,20 @@ To get a list tables in the MySQL database:
 
 For SQL queries to work well from R, the table names in MySQL should not have spaces. The routine below reads the list of tables from the database, converts spaces and dashes to underscores, and then runs the SQL command `RENAME` on those tables that whose name should change.
 
+	> dbtables <- NULL
 	> dbtables$original <- dbListTables(conn)
 	> dbtables$updated <- gsub(" ", "_", dbtables$original)
 	> dbtables$updated <- gsub("-", "_", dbtables$updated)
 	> dbtables <- as.data.frame(dbtables)
 	> dbtables <- dbtables[order(dbtables$original),]
 	>
+	> SQL <- NULL
 	> for (i in 1:nrow(dbtables)) {
-		dbtables$oldname[i]<- dbExistsTable(con, as.character(dbtables[i,1]))
-		dbtables$newname[i]<- dbExistsTable(con, as.character(dbtables[i,2]))
+		dbtables$oldname[i]<- dbExistsTable(conn, as.character(dbtables[i,1]))
+		dbtables$newname[i]<- dbExistsTable(conn, as.character(dbtables[i,2]))
 		if (dbtables$newname[i] == FALSE) {
 			SQL[i]<- paste("RENAME TABLE `", dbtables$original[i],"` TO `", dbtables$updated[i],"`", sep="")
-			dbSendQuery(con, SQL[i])
+			dbSendQuery(conn, SQL[i])
 		}
 	> }
 
