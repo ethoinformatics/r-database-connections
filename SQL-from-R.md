@@ -9,14 +9,15 @@ There are several R libraries that all you to connect to SQL databases from R
 
 #EXAMPLE
 
-Connect to a MySQL database named `pp` running in a local MAMP installation (localhost, on port 8889)
+* Connecting to a MySQL database named `pp` running in a local MAMP installation (localhost, on port 8889)
 
-Start MAMP, MySQL server, and Apache server
-Open R
+First, start MAMP and your MySQL and Apache servers, then open `R` and use the following:
 
 	> library(RMySQL)
 	> conn <- dbConnect(MySQL(), user = 'root', password = 'root', host = 'localhost', unix.socket = '/Applications/MAMP/tmp/mysql/mysql.sock', port = 8889, dbname='pp')
-	> # To get a list tables in the database
+
+To get a list tables in the MySQL database:
+
 	> dbListTables(conn)
 
 For SQL queries to work well from R, the table names in MySQL should not have spaces. The routine below reads the list of tables from the database, converts spaces and dashes to underscores, and then runs the SQL command `RENAME` on those tables that whose name should change.
@@ -35,19 +36,26 @@ For SQL queries to work well from R, the table names in MySQL should not have sp
 			dbSendQuery(con, SQL[i])
 		}
 	> }
-	> # To create a list with names of new table in MySQL
+
+To create a list of the new table names in MySQL:
+
 	> t <- dbListTables(conn)
 	> 
-	> # ... and this is equivalent, but is not connecting to MySQL 
+	> # ... and this is equivalent, but is not connecting to the MySQL database to produce it 
 	> t <- dbtables$updated
 	
-To read a table from a MySQL database into R...
+To read a table from a MySQL database into R:
+
 	> # Generically...
 	> # df <- dbReadTable(con, MySQLTableName)
+	> 
 	> # So... if there is a table in the MySQL database named "observer_samples"...
-	> os <- dbReadTable(con, "observer_samples")
-	> # To read in a second table
-	> av <- dbReadTable(con, "avistajes")
+	> os <- dbReadTable(conn, "observer_samples")
+	> 
+	> # To read in a second table called "avistajes"
+	> av <- dbReadTable(conn, "avistajes")
+
+* Joins among related tables
 
 In the `pp` database, `observer_samples` and `avistajes` are joined by a primary key-foreign key relationship. The primary key in the `observer_sample` table is used as a foreign key in `avistajes` to link each `avistaje` to a single `observer_sample`. We can build a "join table" with information from `observer_samples` and `avistajes` in two ways, by running a JOIN query on the MySQL database from `R` or by using the `merge` function in `R`.
 
@@ -57,8 +65,12 @@ In the `pp` database, `observer_samples` and `avistajes` are joined by a primary
 	> # Joining dataframes in R
 	> osav_join <- merge(os, av, by = "Obs.Sample.ID")
 	> 
-	> # Note tha in the SQL version, you can choose particular fields to come from the left hand table
+	> # Note that in the SQL version, you can choose particular fields to come from the left hand table
 	
+Once queries are completed, close the connection to the database.
+
+	> dbDisconnect(conn)
+
 SQLite
 
 
