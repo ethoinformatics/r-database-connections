@@ -77,10 +77,10 @@ Once queries are completed, close the connection to the database.
 
 **Connecting to a PostgreSQL database named `pp` running in a local Postgres.app installation (localhost, on port 5432)**
 
-Note that the differences from the example above are in the **bolded** lines:
+Note that the differences from the example above are in the **library**, **conn**, and **SQL[i]** lines:
 
-	> **library(RPostgreSQL)**
-	> **conn <- dbConnect("PostgreSQL", user = 'ad26693', password = '', host = 'localhost', port = 5432, dbname='pp')**
+	> library(RPostgreSQL)
+	> conn <- dbConnect("PostgreSQL", user = 'ad26693', password = '', host = 'localhost', port = 5432, dbname='pp')
 	> dbListTables(conn)
 	> dbtables <- NULL
 	> dbtables$original <- dbListTables(conn)
@@ -94,26 +94,37 @@ Note that the differences from the example above are in the **bolded** lines:
     	>	dbtables$oldname[i] <- dbExistsTable(conn, as.character(dbtables[i,1]))
     	>	dbtables$newname[i] <- dbExistsTable(conn, as.character(dbtables[i,2]))
     	>	if (dbtables$newname[i] == FALSE) {
-      	>		**SQL[i]<- paste('ALTER TABLE "', dbtables$original[i],'" RENAME TO "', dbtables$updated[i],'"', sep="")**
+      	>		SQL[i]<- paste('ALTER TABLE "', dbtables$original[i],'" RENAME TO "', dbtables$updated[i],'"', sep="")
       	>		dbSendQuery(conn, SQL[i])
     	>	}
 	> }
 
-PostgreSQL and MySQL differ in their use of single and double quotes!
+To run the same JOIN query as in the MySQL example above, the syntax is a bit different:
 
-From this [website](https://wiki.postgresql.org/wiki/Things_to_find_out_about_when_moving_from_MySQL_to_PostgreSQL)
+	> osav_join <- dbGetQuery(conn, 'SELECT * FROM "observer_samples" INNER JOIN "avistajes" ON "observer_samples"."Obs Sample ID" = "avistajes"."Obs Sample ID"')
+	
 
-Some Differences Between PostgreSQL + MySQL
+**Note that PostgreSQL and MySQL differ in their use of single and double quotes!**
 
-In general, PostgreSQL makes a strong effort to conform to existing database standards, where MySQL has a mixed background on this. If you're coming from a background using MySQL or Microsoft Access, some of the changes can seem strange (such as not using double quotes to quote string values).
-> MySQL uses nonstandard '#' to begin a comment line; PostgreSQL doesn't. Instead, use '--' (double dash), as this is the ANSI standard, and both databases understand it.
-> MySQL uses ' or " to quote values (i.e. WHERE name = "John"). This is not the ANSI standard for databases. PostgreSQL uses only single quotes for this (i.e. WHERE name = 'John'). Double quotes are used to quote system identifiers; field names, table names, etc. (i.e. WHERE "last name" = 'Smith').
-> MySQL uses ` (accent mark or backtick) to quote system identifiers, which is decidedly non-standard.
-> PostgreSQL is case-sensitive for string comparisons. The field "Smith" is not the same as the field "smith". This is a big change for many users from MySQL and other small database systems, like Microsoft Access. In PostgreSQL, you can either:
-> Use the correct case in your query. (i.e. WHERE lname='Smith')
-> Use a conversion function, like lower() to search. (i.e. WHERE lower(lname)='smith')
-> Use a case-insensitive operator, like ILIKE or ~*
-> Database, table, field and columns names in PostgreSQL are case-independent, unless you created them with double-quotes around their name, in which case they are case-sensitive. In MySQL, table names can be case-sensitive or not, depending on which operating system you are using.
-> PostgreSQL and MySQL seem to differ most in handling of dates, and the names of functions that handle dates.
+
+**Summary of Some Important Differences Between PostgreSQL + MySQL - from this [website](https://wiki.postgresql.org/wiki/Things_to_find_out_about_when_moving_from_MySQL_to_PostgreSQL)**
+
+> *In general, PostgreSQL makes a strong effort to conform to existing database standards, where MySQL has a mixed background on this. If you're coming from a background using MySQL or Microsoft Access, some of the changes can seem strange (such as not using double quotes to quote string values).*
+ 
+> * *MySQL uses nonstandard '#' to begin a comment line; PostgreSQL doesn't. Instead, use '--' (double dash), as this is the ANSI standard, and both databases understand it.*
+ 
+> * *MySQL uses ' or " to quote values (i.e. WHERE name = "John"). This is not the ANSI standard for databases. PostgreSQL uses only single quotes for this (i.e. WHERE name = 'John'). Double quotes are used to quote system identifiers; field names, table names, etc. (i.e. WHERE "last name" = 'Smith').*
+
+> * *MySQL uses ` (accent mark or backtick) to quote system identifiers, which is decidedly non-standard.*
+> * *PostgreSQL is case-sensitive for string comparisons. The field "Smith" is not the same as the field "smith". This is a big change for many users from MySQL and other small database systems, like Microsoft Access. In PostgreSQL, you can either:*
+
+>	
+	*  Use the correct case in your query. (i.e. WHERE lname='Smith')
+	* Use a conversion function, like lower() to search. (i.e. WHERE lower(lname)='smith')
+	* Use a case-insensitive operator, like ILIKE or ~*
+
+> * *Database, table, field and columns names in PostgreSQL are case-independent, unless you created them with double-quotes around their name, in which case they are case-sensitive. In MySQL, table names can be case-sensitive or not, depending on which operating system you are using.*
+
+> * *PostgreSQL and MySQL seem to differ most in handling of dates, and the names of functions that handle dates.*
 
 SQLite
