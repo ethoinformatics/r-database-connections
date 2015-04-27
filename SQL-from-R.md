@@ -1,4 +1,4 @@
-#Connecting from `R` to an SQL format database
+#Connecting from `R` to a SQL format relational database
 
 There are several `R` libraries that all you to connect to SQL databases from `R`
 
@@ -8,7 +8,7 @@ There are several `R` libraries that all you to connect to SQL databases from `R
 - library(sqldf)
 
 
-##EXAMPLE
+##`MySQL` EXAMPLE
 
 **Connecting to a MySQL database named `pp` running in a local MAMP installation (localhost, on port 8889)**
 
@@ -88,9 +88,9 @@ Once queries are completed, close the connection to the database.
 > dbDisconnect(conn)
 ````
 
-##EXAMPLE
+##`PostgreSQL` EXAMPLE
 
-**Connecting to a `PostgreSQL` database named `pp` running in a local `Postgres.app` installation (localhost, on port 5432)**
+**Connecting to a `PostgreSQL` database named `pp` stored in a local `Postgres.app` installation (localhost, on port 5432)**
 
 Note that the differences from the example above are in the **library**, **conn**, and **SQL[i]** lines:
 
@@ -115,6 +115,8 @@ Note that the differences from the example above are in the **library**, **conn*
 >     }
 > }
 ````
+
+Note that the syntax for renaming a table is different than that used in `MySQL`!
 
 To run the same `JOIN` query as in the `MySQL` example above, the syntax is a bit different:
 
@@ -143,3 +145,45 @@ To run the same `JOIN` query as in the `MySQL` example above, the syntax is a bi
 > * *Database, table, field and columns names in `PostgreSQL` are case-independent, unless you created them with double-quotes around their name, in which case they are case-sensitive. In `MySQL`, table names can be case-sensitive or not, depending on which operating system you are using.*
 
 > * *`PostgreSQL` and `MySQL` seem to differ most in handling of dates, and the names of functions that handle dates.*
+
+
+##`SQLite` EXAMPLE
+
+**Connecting to an `SQLite` database file named `pp.sqlite` on the Desktop in Mac OSX**
+
+Unlike `MySQL` and `PostgreSQL`, which are server-based databases (though in the examples above, these are set up as locally running servers, i.e., as a "localhost" on a user's own machine, `SQLite` databases are contained in a single file. The `R` library `RSQLite` allowa easy connection to such databases by using the path to a local copy of the database.
+
+````
+> library(RSQLite)
+> path <- "~/Desktop/pp.sqlite"
+> conn <- dbConnect(SQLite(),dbname = path)
+> 
+> dbListTables(conn)
+> dbtables <- NULL
+> dbtables$original <- dbListTables(conn)
+> dbtables$updated <- gsub(" ", "_", dbtables$original)
+> dbtables$updated <- gsub("-", "_", dbtables$updated)
+> dbtables <- as.data.frame(dbtables)
+> dbtables <- dbtables[order(dbtables$original),]
+>
+> SQL <- NULL
+> for (i in 1:nrow(dbtables)) {
+>     dbtables$oldname[i] <- dbExistsTable(conn, as.character(dbtables[i,1]))
+>     dbtables$newname[i] <- dbExistsTable(conn, as.character(dbtables[i,2]))
+>     if (dbtables$newname[i] == FALSE) {
+>         SQL[i]<- paste('ALTER TABLE "', dbtables$original[i],'" RENAME TO "', dbtables$updated[i],'"', sep="")
+>        dbSendQuery(conn, SQL[i])
+>     }
+> }
+> 
+````
+
+Note that the syntax for renaming a table (`"ALTER TABLE xxx RENAME TO xxx"`) is that used in `PostgreSQL`.
+
+**EITHER** of the `JOIN` queries used above for `MySQL` or `PostgreSQL` can be used to join two tables from `SQLite`:
+
+````
+> osav_join <- dbGetQuery(conn, "SELECT * FROM `observer_samples` JOIN `avistajes` WHERE `observer_samples`.`Obs Sample ID` = `avistajes`.`Obs Sample ID`")
+> 
+> osav_join <- dbGetQuery(conn, 'SELECT * FROM "observer_samples" INNER JOIN "avistajes" ON "observer_samples"."Obs Sample ID" = "avistajes"."Obs Sample ID"')
+````
