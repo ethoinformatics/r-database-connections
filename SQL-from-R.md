@@ -79,7 +79,7 @@ In the `pp` database, `observer_samples` and `avistajes` are joined by a primary
 > # Joining dataframes in R
 > osav_join <- merge(os, av, by = "Obs.Sample.ID")
 > 
-> # Note that in the SQL version, you can choose particular fields to come from the left hand table
+> # Note that in the SQL version of the join, you can choose particular fields to come from the left hand table
 ````
 	
 Once queries are completed, close the connection to the database.
@@ -91,6 +91,8 @@ Once queries are completed, close the connection to the database.
 ##`PostgreSQL` EXAMPLE
 
 **Connecting to a `PostgreSQL` database named `pp` stored in a local `Postgres.app` installation (localhost, on port 5432)**
+
+First, start your `Postgres.app` installation, then open `R` and use the following:
 
 Note that the differences from the example above are in the **library**, **conn**, and **SQL[i]** lines:
 
@@ -123,7 +125,13 @@ To run the same `JOIN` query as in the `MySQL` example above, the syntax is a bi
 ````
 > osav_join <- dbGetQuery(conn, 'SELECT * FROM "observer_samples" INNER JOIN "avistajes" ON "observer_samples"."Obs Sample ID" = "avistajes"."Obs Sample ID"')
 ````
-	
+
+Once queries are completed, close the connection to the database.
+
+````
+> dbDisconnect(conn)
+````
+
 **Note that `PostgreSQL` and `MySQL` differ in their use of single and double quotes!**
 
 ####Summary of Some Important Differences Between `PostgreSQL` and `MySQL` - from this [website](https://wiki.postgresql.org/wiki/Things_to_find_out_about_when_moving_from_MySQL_to_PostgreSQL)
@@ -186,4 +194,10 @@ Note that the syntax for renaming a table (`"ALTER TABLE xxx RENAME TO xxx"`) is
 > osav_join <- dbGetQuery(conn, "SELECT * FROM `observer_samples` JOIN `avistajes` WHERE `observer_samples`.`Obs Sample ID` = `avistajes`.`Obs Sample ID`")
 > 
 > osav_join <- dbGetQuery(conn, 'SELECT * FROM "observer_samples" INNER JOIN "avistajes" ON "observer_samples"."Obs Sample ID" = "avistajes"."Obs Sample ID"')
+````
+
+Once queries are completed, close the connection to the database.
+
+````
+> dbDisconnect(conn)
 ````
