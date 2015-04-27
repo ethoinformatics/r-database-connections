@@ -1,4 +1,4 @@
-#Connect to an MS Access .mdb database from `R` on Mac OSX
+#Connect to an `Microsoft Access` *.mdb database from `R` on Mac OSX
 
 ## 1. Install `homebrew` [brew.sh/](http://brew.sh/)
 

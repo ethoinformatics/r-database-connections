@@ -1,4 +1,4 @@
-#Connect to an MS Access .mdb database from `R` on Windows 8
+#Connect to an `Microsoft Access` *.mdb database from `R` on Windows 8
 
 ## 1. Register your database in the `ODBC Data Source Administrator`
 
