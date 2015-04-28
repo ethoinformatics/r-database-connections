@@ -35,17 +35,12 @@ For SQL queries to work well from R, the table names in MySQL should not have sp
 dbtables <- list()
 dbtables$original <- dbListTables(conn)
 dbtables$updated <- gsub("[ -]", "_", dbtables$original)
-dbtables <- as.data.frame(dbtables)
+dbtables <- as.data.frame(dbtables,stringsAsFactors=FALSE)
 dbtables <- dbtables[order(dbtables$original),]
 
-SQL <- apply(dbtables,1,function(x) {
-	paste0('RENAME TABLE `',x['original'],'` TO ',x['updated'])
+dev.null <- apply(dbtables[dbtables$original != dbtables$updated,],1,function(x) {
+	dbSendQuery(conn,paste0('RENAME TABLE `',x['original'],'` TO ',x['updated']))
 })
-
-# Concatenate semicolons and collapse vector into a single string
-SQL <- paste(paste0(SQL,';'),collapse=' ')
-
-dbSendQuery(conn, SQL)
 ```
 
 
@@ -66,10 +61,10 @@ for (i in 1:nrow(dbtables)) {
 To create a list of the new table names in MySQL:
 
 ```R
-t <- dbListTables(conn)
+table.names <- dbListTables(conn)
 
 # ... and this is equivalent, but is not connecting to the MySQL database to produce it
-t <- dbtables$updated
+table.names <- dbtables$updated
 ```
 
 To read a table from a MySQL database into R:
