@@ -86,7 +86,7 @@ We can add all these to the `pp` Couch database as follows. We first make a docu
 
 ````
 > for (i in 1:nrow(d)){
-> 	doc <- as.list(d[1,]) 
+> 	doc <- as.list(d[i,]) 
 > 	doc_create(doc,dbname='pp',docid = d$eventID)
 > }
 ````
@@ -94,5 +94,8 @@ We can add all these to the `pp` Couch database as follows. We first make a docu
 We can read these out of `CouchDB` by using `doc_get()` and specifying their Couch "\_id".
 
 ````
-
-
+> for (i in d$eventID) {
+>  res <- doc_get(dbname="pp",docid=i)
+>  res
+> }
+````
