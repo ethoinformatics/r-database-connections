@@ -122,7 +122,7 @@ mdb.get(filename, tables=TRUE)
 # To import one table, named "observer"
 dbtable <- mdb.get(filename, tables='observer')
 # To import several tables
- db <- mdb.get(filename, tables=c('observer','contacts')
+db <- mdb.get(filename, tables=c('observer','contacts')
 ```
 
 Note that the function `mdb.get` reads the data in the tables as CSV data. It can deal with carriage returns in text fields in the database and reads these as newline characters.

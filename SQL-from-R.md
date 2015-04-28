@@ -2,10 +2,12 @@
 
 There are several `R` libraries that all you to connect to SQL databases from `R`
 
-- library(RMySQL)
-- library(RPostgreSQL)
-- library(RSQLite)
-- library(sqldf)
+```R
+library(RMySQL)
+library(RPostgreSQL)
+library(RSQLite)
+library(sqldf)
+```
 
 
 ##`MySQL` EXAMPLE
@@ -14,20 +16,20 @@ There are several `R` libraries that all you to connect to SQL databases from `R
 
 First, start `MAMP` and your `MySQL` and `Apache` servers, then open `R` and use the following:
 
-````
+```R
 library(RMySQL)
 conn <- dbConnect(MySQL(), user = 'root', password = 'root', host = 'localhost', unix.socket = '/Applications/MAMP/tmp/mysql/mysql.sock', port = 8889, dbname='pp')
-````
+```
 
 To get a list tables in the `MySQL` database:
 
-````
+```R
 dbListTables(conn)
-````
+```
 
 For SQL queries to work well from `R`, the table names in `MySQL` should not have spaces. The routine below reads the list of tables from the database, converts spaces and dashes to underscores, and then runs the SQL command `RENAME` on those tables that whose name should change.
 
-````
+```R
 dbtables <- NULL
 dbtables$original <- dbListTables(conn)
 dbtables$updated <- gsub(" ", "_", dbtables$original)
@@ -44,20 +46,20 @@ for (i in 1:nrow(dbtables)) {
         dbSendQuery(conn, SQL[i])
    }
 }
-````
+```
 
 To create a list of the new table names in `MySQL`:
 
-````
+```R
 t <- dbListTables(conn)
 
 # ... and this is equivalent, but is not connecting to the MySQL database to produce it
 t <- dbtables$updated
-````
+```
 
 To read a table from a `MySQL` database into `R`:
 
-````
+```R
 # Generically...
 # df <- dbReadTable(conn, MySQLTableName)
 
@@ -66,13 +68,13 @@ os <- dbReadTable(conn, "observer_samples")
 
 # To read in a second table called "avistajes"
 av <- dbReadTable(conn, "avistajes")
-````
+```
 
 **Joins among related tables**
 
 In the `pp` database, `observer_samples` and `avistajes` are joined by a primary key-foreign key relationship. The primary key in the `observer_sample` table is used as a foreign key in `avistajes` to link each `avistaje` to a single `observer_sample`. We can build a "join table" with information from `observer_samples` and `avistajes` in two ways, by running a `JOIN` query on the `MySQL` database from `R` or by using the `merge` function in `R`.
 
-````
+```R
 # Joining via SQL, using WHERE to indicate the field(s) to JOIN on
 osav_join <- dbGetQuery(conn, "SELECT * FROM `observer_samples` JOIN `avistajes` WHERE `observer_samples`.`Obs Sample ID` = `avistajes`.`Obs Sample ID`")
 
@@ -80,13 +82,13 @@ osav_join <- dbGetQuery(conn, "SELECT * FROM `observer_samples` JOIN `avistajes`
 osav_join <- merge(os, av, by = "Obs.Sample.ID")
 
 # Note that in the SQL version of the join, you can choose particular fields to come from the left hand table
-````
+```
 
 Once queries are completed, close the connection to the database.
 
-````
+```R
 dbDisconnect(conn)
-````
+```
 
 ##`PostgreSQL` EXAMPLE
 
@@ -96,7 +98,7 @@ First, start your `Postgres.app` installation, then open `R` and use the followi
 
 Note that the differences from the example above are in the **library**, **conn**, and **SQL[i]** lines:
 
-````
+```R
 library(RPostgreSQL)
 conn <- dbConnect("PostgreSQL", user = 'ad26693', password = '', host = 'localhost', port = 5432, dbname='pp')
 dbListTables(conn)
@@ -116,21 +118,21 @@ for (i in 1:nrow(dbtables)) {
        dbSendQuery(conn, SQL[i])
     }
 }
-````
+```
 
 Note that the syntax for renaming a table is different than that used in `MySQL`!
 
 To run the same `JOIN` query as in the `MySQL` example above, the syntax is a bit different:
 
-````
+```R
 osav_join <- dbGetQuery(conn, 'SELECT * FROM "observer_samples" INNER JOIN "avistajes" ON "observer_samples"."Obs Sample ID" = "avistajes"."Obs Sample ID"')
-````
+```
 
 Once queries are completed, close the connection to the database.
 
-````
+```R
 dbDisconnect(conn)
-````
+```
 
 **Note that `PostgreSQL` and `MySQL` differ in their use of single and double quotes!**
 
@@ -161,7 +163,7 @@ dbDisconnect(conn)
 
 Unlike `MySQL` and `PostgreSQL`, which are server-based databases (though in the examples above, these are set up as locally running servers, i.e., as a "localhost" on a user's own machine, `SQLite` databases are contained in a single file. The `R` library `RSQLite` allowa easy connection to such databases by using the path to a local copy of the database.
 
-````
+```R
 library(RSQLite)
 path <- "~/Desktop/pp.sqlite"
 conn <- dbConnect(SQLite(),dbname = path)
@@ -184,20 +186,20 @@ for (i in 1:nrow(dbtables)) {
     }
 }
 
-````
+```
 
 Note that the syntax for renaming a table (`"ALTER TABLE xxx RENAME TO xxx"`) is that used in `PostgreSQL`.
 
 **EITHER** of the `JOIN` queries used above for `MySQL` or `PostgreSQL` can be used to join two tables from `SQLite`:
 
-````
+```R
 osav_join <- dbGetQuery(conn, "SELECT * FROM `observer_samples` JOIN `avistajes` WHERE `observer_samples`.`Obs Sample ID` = `avistajes`.`Obs Sample ID`")
 
 osav_join <- dbGetQuery(conn, 'SELECT * FROM "observer_samples" INNER JOIN "avistajes" ON "observer_samples"."Obs Sample ID" = "avistajes"."Obs Sample ID"')
-````
+```
 
 Once queries are completed, close the connection to the database.
 
-````
+```R
 dbDisconnect(conn)
-````
+```
