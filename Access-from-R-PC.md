@@ -11,12 +11,12 @@
 
 [DOCUMENTATION](http://cran.r-project.org/web/packages/RODBC/RODBC.pdf) for `RODBC`
 
-	> install.package("RODBC")
-	> library(RODBC)
+install.package("RODBC")
+library(RODBC)
 
 ## 3. Set up a connection to an .mdb database from `R` with the command `odbcConnect`.
 
-	> conn < odbcConnect(dsn, uid="", pwd="")
+conn < odbcConnect(dsn, uid="", pwd="")
 
 Here, `dsn` is the name of a registered DSN, `uid` is a user ID, and `pwd` is a password to the database, if these are needed.
 
@@ -24,22 +24,22 @@ Here, `dsn` is the name of a registered DSN, `uid` is a user ID, and `pwd` is a 
 
 The following example `R` script lets you connect to a database that you have registered in the `ODBC Data Source Administrator` as `test`.
 
-	> library(RODBC)
-	> dsn <- "test"
-	> 
-	> # To connect to the database
-	> conn <-odbcConnect(dsn, uid="", pwd="")
-	>
-	> # To list the names of the tables in your database
-	> dbtables <- sqlTables(conn, tableType="TABLE")
-	>
-	> # To read the contents of a table into a dataframe
-	> df <- sqlFetch(conn,dbtables$TABLE_NAME)
-	>
-	> # To query a table and return contents into a dataframe
-	> sql <-paste("select * from `", dbtables$TABLE_NAME, "`", sep="")
-	> dbquery <- sqlQuery(conn, sql)
-	> # Note: be careful with quotations in query structure 
-	>
-	> # To close the connection
-	> close(conn)
+library(RODBC)
+dsn <- "test"
+
+# To connect to the database
+conn <-odbcConnect(dsn, uid="", pwd="")
+
+# To list the names of the tables in your database
+dbtables <- sqlTables(conn, tableType="TABLE")
+
+# To read the contents of a table into a dataframe
+df <- sqlFetch(conn,dbtables$TABLE_NAME)
+
+# To query a table and return contents into a dataframe
+sql <-paste("select * from `", dbtables$TABLE_NAME, "`", sep="")
+dbquery <- sqlQuery(conn, sql)
+# Note: be careful with quotations in query structure
+
+# To close the connection
+close(conn)
