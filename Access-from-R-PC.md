@@ -11,12 +11,16 @@
 
 [DOCUMENTATION](http://cran.r-project.org/web/packages/RODBC/RODBC.pdf) for `RODBC`
 
+```R
 install.package("RODBC")
 library(RODBC)
+```
 
 ## 3. Set up a connection to an .mdb database from `R` with the command `odbcConnect`.
 
+```R
 conn < odbcConnect(dsn, uid="", pwd="")
+```
 
 Here, `dsn` is the name of a registered DSN, `uid` is a user ID, and `pwd` is a password to the database, if these are needed.
 
@@ -24,6 +28,7 @@ Here, `dsn` is the name of a registered DSN, `uid` is a user ID, and `pwd` is a 
 
 The following example `R` script lets you connect to a database that you have registered in the `ODBC Data Source Administrator` as `test`.
 
+```R
 library(RODBC)
 dsn <- "test"
 
@@ -43,3 +48,4 @@ dbquery <- sqlQuery(conn, sql)
 
 # To close the connection
 close(conn)
+```
