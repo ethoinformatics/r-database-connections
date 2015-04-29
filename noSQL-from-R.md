@@ -16,7 +16,7 @@ There are several packages for `R` that let you connect to document-based "noSQL
  
 ##Connecting to `CouchDB` and Creating a New Database from `R`
 
-**Method 1: Using the "sofa" library**
+###EXAMPLE 1: Using the _sofa_ library in `R`
 
 Open `R` and install the `sofa` package. A binary installer is not yet available for `sofa` for the most recent versions of `R`, so you will need to first install the `devtools` package and then install `sofa` from the [`ropensci/sofa`](https://github.com/ropensci/sofa) GitHub repo.
 
@@ -25,6 +25,7 @@ install.packages('devtools')
 devtools::install_github("ropensci/sofa")
 library(sofa)
 ```
+
 The function `cushion` lets us connect to `CouchDB`:
 
 ```R
@@ -254,4 +255,330 @@ revs
 [3] "3-25351fd1084b9f0e96ed6e58ea8c6264"
 [4] "2-3008a284d8f850bd2f65dccc6fcedca0"
 [5] "1-a64ef66db2dca7abde957c5b117d6d64" 
+```
+
+###EXAMPLE 2: Using the _R4CouchDB_ library in `R`
+
+Open `R` and install the **R4CouchDB** package. You should be able to install this directly from CRAN via the package manager in `R Studio`. More information on this library can be found [here](https://github.com/wactbprot/R4CouchDB).
+
+> **NOTE:** You will need to first `detach` the **jsonlite** and **sofa** libraries if they are already installed before you will be able to use the functions in the **R4CouchDB** library as they share function names in common.
+
+```R
+detach("package:sofa", unload=TRUE)
+detach("package:jsonlite", unload=TRUE)
+
+install.packages("R4CouchDB")
+library(R4CouchDB)
+```
+
+All **R4CouchDB** functions take as their argument a 'cdb' object, which is an `R` list containing both information about the connection set up to CouchDB and the data being passed back and forth. The "information" part of this object is like the "cushion" object used by the **sofa** library.
+
+A 'cdb' object can be created with the function `cdbIni()`
+
+```R
+# initiates connection with localhost on port 5984
+cdb <- cdbIni(serverName="localhost", port=5984)
+```
+
+To list the databases present in `CouchDB`, we use `cdbListDB()`.
+
+```R
+cdb <- cdbListDB(cdb) # returns a list of databases to the variable cdb
+cdb$res # shows the results of the function call
+
+[[1]]
+[1] "_replicator"
+
+[[2]]
+[1] "_users"
+
+[[3]]
+[1] "pp"
+
+```
+
+To repeat the above exercise of creating a `CouchDB` database and adding documents to it, we first delete the existing `pp` database and then remake it. To do this we use the functions `cdbRemoveDB()` and `cdbMakeDB()`.
+
+```R
+cdb$removeDBName <- "pp" # specify the name of the database to delete
+cdb <- cdbRemoveDB(cdb) # command to remove the database
+cdb$res # show the results of the function call
+
+$ok
+[1] TRUE
+
+cdb <- cdbListDB(cdb) # check to verify that the `pp` database no longer exists
+cdb$res
+
+[[1]]
+[1] "_replicator"
+
+[[2]]
+[1] "_users"
+
+cdb$newDBName <- "pp" # specify the name of the database to create
+cdb <- cdbMakeDB(cdb) # command to create the database
+cdb$res # show the results of the function call
+
+$ok
+[1] TRUE
+
+cdb <- cdbListDB(cdb) # check to verify that the `pp` database has been created
+cdb$res
+
+[[1]]
+[1] "_replicator"
+
+[[2]]
+[1] "_users"
+
+[[3]]
+[1] "pp"
+
+```
+
+To add documents to this database, we will use the function `cdbAddDoc()`. But we need to do a bit of other preliminary work first. First, lets recreate our dataframe, d, as above. To do this, we need to load the **jsonlite** library again to read in our data with the `fromJSON()` function. **R4CouchDB** includes a comparably named function (actually, it includes the `fromJSON()` function from the package **RJSONIO**, upon which **jsonlite** is based, but **RSJONIO** loads JSON files into `R` dataframes column-wise and **jsonlite** loads JSON files into `R` either row-wise or column-wise (row-wise is the default). The data in "diary.txt" is presented "row-wise" (500 rows of 17 variables each). If we read it in using **RJSONIO**'s `fromJSON()` function, we would get 17 rows of 500 variables each. SO... we'll first load **jsonlite**, read in our data, then detach **jsonlite**
+
+
+```R
+library(jsonlite)
+path <- "~/Desktop/diary.txt"
+d <-as.data.frame(fromJSON(path))
+detach("package:jsonlite", unload=TRUE)
+```
+
+Now, lets loop through the dataframe and add each row as a separate document to `CouchDB`, as in the example above. The 'cdb' object needs the server name and port ('cdb$serverName' and 'cdb$port', which we set above with the `cdbIni()` call and are still in place), the database name to add to ('cdb$DBName'), an '\_id' for the document ('cdb$id'), and a list object containing the data to enter ('cdb$dataList'). If an '\_id' is not provided, Couch will assign one.
+
+```R
+cdb$DBName <- "pp"
+for (i in 1:nrow(d)){
+  doc <- as.list(d[i,])
+  cdb$id <- doc$eventID
+  cdb$dataList <- doc
+  cdb <- cdbAddDoc(cdb)
+}
+```
+
+To read these back out of Couch, we use the function `cdbGetDoc()` with a 'cdb' object as its argument. In addition to the server name and port (still in place), the 'cdb' object needs to hold the database name ('cdb$DBName') and the '\_id' of the document ('cdb$id').
+
+```R
+res <- NULL
+cdb$DBName <- "pp"
+for (i in d$eventID) {
+		cdb$id <- i
+		cdb <- cdbGetDoc(cdb)
+		doc <- as.data.frame(cdb$res) # creates a 1 row dataframe for the returned doc...
+		res <- rbind(res,doc) # ...and then binds these row-wise
+	}
+# clean up column names
+names(res)[names(res) == "X_id"] <- "_id"
+names(res)[names(res) == "X_rev"] <- "_rev"
+```
+
+To update a particular document, we use the function `cdbUpdateDoc()` with a 'cdb' object as its argument. In addition to the server name and port (still in place), the 'cdb' object needs to hold the database name ('cdb$DBName') and the '\_id' of the document ('cdb$id').
+
+We first get the document of interest...
+
+```R
+cdb$id <- "OS17016"
+cdb <- cdbGetDoc(cdb)
+cdb$res
+
+$`_id`
+[1] "OS17016"
+
+$`_rev`
+[1] "1-a64ef66db2dca7abde957c5b117d6d64"
+
+$activityBy
+[1] "LAURA ABONDANO"
+
+$activityID
+[1] "OS17016"
+
+$activityRemarks
+[1] ""
+
+$activityType
+[1] "diary"
+
+$dctermsType
+[1] "Event"
+
+$decimalLatitude
+[1] ""
+
+$decimalLongitude
+[1] ""
+
+$eventDate
+[1] "2013-06-03"
+
+$eventID
+[1] "OS17016"
+
+$eventRemarks
+[1] "June 03, 2013 <96> OS17016\nArrive to the station."
+
+$footprint
+[1] ""
+
+$footprintEnd
+[1] ""
+
+$footprintSRS
+[1] "GEOGCS['GCS_WGS_1984',DATUM['D_WGS_1984',SPHEROID['WGS_1984',6378137,298.257223563]],PRIMEM['Greenwich',0],UNIT['Degree',0.0174532925199433]]"
+
+$footprintStart
+[1] ""
+
+$geodeticDatum
+[1] "EPSG:4326"
+
+$locationID
+[1] "OS17016"
+
+$locationRemarks
+[1] ""
+```
+We can then change the value of a particular field in the document, in this case the 'activtyBy' field.
+
+```R
+cdb$dataList$activityBy <- "TONY DIFIORE"
+cdb <- cdbUpdateDoc(cdb)
+cdb$res
+
+$ok
+[1] TRUE
+
+$id
+[1] "OS17016"
+
+$rev
+[1] "2-dcf1a5553daf3e88a994b8700f7dc363"
+```
+
+We can then get this document from the database and look at it to confirm the change was made.
+
+```R
+> cdb$id <- "OS17016"
+> cdb <- cdbGetDoc(cdb)
+> cdb$res
+$`_id`
+[1] "OS17016"
+
+$`_rev`
+[1] "2-dcf1a5553daf3e88a994b8700f7dc363"
+
+$activityBy
+[1] "TONY DIFIORE"
+
+$activityID
+[1] "OS92709"
+
+$activityRemarks
+[1] ""
+
+$activityType
+[1] "diary"
+
+$dctermsType
+[1] "Event"
+
+$decimalLatitude
+[1] ""
+
+$decimalLongitude
+[1] ""
+
+$eventDate
+[1] "2014-08-04"
+
+$eventID
+[1] "OS92709"
+
+$eventRemarks
+[1] "August 4, 2014 - OS92709\n\tLeave the station ?."
+
+$footprint
+[1] ""
+
+$footprintEnd
+[1] ""
+
+$footprintSRS
+[1] "GEOGCS['GCS_WGS_1984',DATUM['D_WGS_1984',SPHEROID['WGS_1984',6378137,298.257223563]],PRIMEM['Greenwich',0],UNIT['Degree',0.0174532925199433]]"
+
+$footprintStart
+[1] ""
+
+$geodeticDatum
+[1] "EPSG:4326"
+
+$locationID
+[1] "OS92709"
+
+$locationRemarks
+[1] ""
+```
+
+Now, we can update it again back to the correct 'activityBy' value.
+
+```R
+cdb$id <- "OS17016"
+cdb <- cdbGetDoc(cdb)
+cdb$dataList$activityBy <- "LAURA ABONDANO"
+cdb <- cdbUpdateDoc(cdb)
+
+$ok
+[1] TRUE
+
+$id
+[1] "OS17016"
+
+$rev
+[1] "3-0c67d6a24fe2beda1ef73b53eb41ff4c"
+```
+
+To delete a document, we use `cdbDeleteDoc()` with a 'cdb' object as its argument. In addition to the server name and port (again, still our defaults), the 'cdb' object needs to hold the database name ('cdb$DBName') and the '\_id' of the document ('cdb$id').
+
+```R
+cdb$id <- "OS17016"
+cdb <- cdbDeleteDoc(cdb)
+cdb$res
+
+$ok
+[1] TRUE
+
+$id
+[1] "OS17016"
+
+$rev
+[1] "4-34e546e87a8886afc59508f90800a8ee"
+```
+If we try to get this document, we get an error message saying the document has been deleted.
+
+```R
+cdb <- cdbGetDoc(cdb)
+
+Error in cdb$checkRes(cdb, res) : 
+  server error: not_found server reason: deleted
+```
+
+And adding a document back in with the same '\_id' value adds another revision.
+
+```R
+cdb$id <- "OS17016"
+cdb$dataList <- as.list(d[1,])
+cdb <- cdbAddDoc(cdb)
+cdb$res
+
+$ok
+[1] TRUE
+
+$id
+[1] "OS17016"
+
+$rev
+[1] "5-921bac5a5a0a51481cb3d22accea2796"
 ```
