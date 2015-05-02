@@ -12,9 +12,9 @@ library(sqldf)
 
 ## MySQL example
 
-**Connecting to a MySQL database named `pp` running in a local MAMP installation (localhost, on port 8889)**
+**We can connect to a MySQL database named `pp` running in a local MAMP installation...**
 
-First, start MAMP and your MySQL and Apache servers, then open R and use the following:
+First, start MAMP and your MySQL and Apache servers. This means you will connect to a 'localhost'. We will use the default port number of '8889' and assume we are connected as the 'root' user. Then open R and use the following:
 
 <!-- We need to edit the below example so that it works off of the sandbox server, not on localhost. Need to create users with own privileges as well. -->
 
@@ -23,9 +23,9 @@ library(RMySQL)
 conn <- dbConnect(MySQL(), user = 'root', password = 'root', host = 'localhost', unix.socket = '/Applications/MAMP/tmp/mysql/mysql.sock', port = 8889, dbname='pp')
 ```
 
-**Alternatively, we can connect to a MySQL database named `pp` running on a differnt host.**
+**Alternatively, we can connect to a MySQL database named `pp` running on a remote host...**
 
-For example, to connect to the same database hosted at IP address 104.236.9.143 via the MySQL default communication port # 3306. Here, we specify the name and password of a particular user who has to have read and write privileges on the database (privileges are set up separately).**
+The R code below allows us to connect to the same database hosted in our own sandbox server at IP address 104.236.9.143 via the MySQL default communication port number '3306'. Here, we specify the name and password of a particular user who has been given read and write privileges on the database (users and their privileges are set up separately).**
 
 ```R
 library(RMySQL)
