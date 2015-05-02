@@ -57,6 +57,8 @@ for (bad.name in bad.names) {
 	# in which the original table name contained spaces.
 
 	dbSendQuery(conn,paste0('RENAME TABLE `',bad.name,'` TO ',good.name))
+	
+	# Note: the function 'paste0()' is equivalent to the function 'paste()' with the argument sep=""
 }
 ```
 
