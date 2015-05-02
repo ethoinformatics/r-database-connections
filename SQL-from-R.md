@@ -130,7 +130,7 @@ The R code below allows us to connect to the same database hosted in our own san
 
 ```R
 library(RPostgreSQL)
-conn <- dbConnect('PostgreSQL', user = 'ethoguest', password = 'ethogues', host = '104.236.9.143', port = 5432, dbname='pp')
+conn <- dbConnect('PostgreSQL', user = 'ethoguest', password = 'ethoguest', host = '104.236.9.143', port = 5432, dbname='pp')
 ```
 
 > A CAVEAT: If you try to load the RPostgreSQL library in R after previously loading the RMySQL library and then try to connect to a PostgreSQL database, you may get an error message. This is a known issue with the RMySQL library. Restarting R and then loading the RPostgreSQL library is a workaround.
