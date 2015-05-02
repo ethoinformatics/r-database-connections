@@ -115,15 +115,29 @@ dbDisconnect(conn)
 
 ##`PostgreSQL` EXAMPLE
 
-**Connecting to a `PostgreSQL` database named `pp` stored in a local `Postgres.app` installation (localhost, on port 5432)**
+**We can connect to a PostgreSQL database named `pp` stored in a local `Postgres.app` installation...**
 
-First, start your `Postgres.app` installation, then open R and use the following:
+First, start your `Postgres.app` installation, then open R and use the code below, replacing USERNAME and PASSWORD with the name and password you provided in setting up your Postgres.app installation. You will connect to a 'localhost' using the default port number of '5432'.
 
-Note that the differences from the example above are in the **library**, **conn**, and **SQL[i]** lines:
+> Note that the differences from the MySQL example above are in the **library**, **conn**, and **SQL[i]** lines:
 
 ```R
 library(RPostgreSQL)
-conn <- dbConnect('PostgreSQL', user = 'ad26693', password = '', host = 'localhost', port = 5432, dbname='pp')
+conn <- dbConnect('PostgreSQL', user = 'USERNAME', password = 'PASSWORD', host = 'localhost', port = 5432, dbname='pp')
+```
+
+**Alternatively, we can connect to a PostgreSQL database named `pp` running on a remote host...**
+
+The R code below allows us to connect to the same database hosted in our own sandbox server at IP address 104.236.9.143 via the PostgreSQL default communication port number '5432'. Here, we specify the name and password of a particular user who has been given read and write privileges on the database (users and their privileges are set up separately).**
+
+```R
+library(RPostgreSQL)
+conn <- dbConnect('PostgreSQL', user = 'ethoguest', password = 'ethogues', host = '104.236.9.143', port = 5432, dbname='pp')
+```
+
+**Once the connection is set up, we can begin using R code to access information about or in the database.**
+
+```R
 dbListTables(conn)
 dbtables <- NULL
 dbtables$original <- dbListTables(conn)
@@ -156,7 +170,7 @@ Once queries are completed, close the connection to the database.
 dbDisconnect(conn)
 ```
 
-**Note that `PostgreSQL` and MySQL differ in their use of single and double quotes!**
+**Note that `PostgreSQL` and MySQL differ in their use of single and double quotes in queries!**
 
 ####Summary of Some Important Differences Between `PostgreSQL` and MySQL - from this [website](https://wiki.postgresql.org/wiki/Things_to_find_out_about_when_moving_from_MySQL_to_PostgreSQL)
 
