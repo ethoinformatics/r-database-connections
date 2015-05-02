@@ -117,9 +117,7 @@ dbDisconnect(conn)
 
 **We can connect to a PostgreSQL database named `pp` stored in a local `Postgres.app` installation...**
 
-First, start your `Postgres.app` installation, then open R and use the code below, replacing USERNAME and PASSWORD with the name and password you provided in setting up your Postgres.app installation. You will connect to a 'localhost' using the default port number of '5432'.
-
-> Note that the differences from the MySQL example above are in the **library**, **conn**, and **SQL[i]** lines:
+First, start your `Postgres.app` installation, then open R and use the code below, replacing USERNAME and PASSWORD with the name and password you provided in setting up your `Postgres.app` installation. You will connect to a 'localhost' using the default port number of '5432'.
 
 ```R
 library(RPostgreSQL)
@@ -134,6 +132,8 @@ The R code below allows us to connect to the same database hosted in our own san
 library(RPostgreSQL)
 conn <- dbConnect('PostgreSQL', user = 'ethoguest', password = 'ethogues', host = '104.236.9.143', port = 5432, dbname='pp')
 ```
+
+> A CAVEAT: If you try to load the RPostgreSQL library in R after previously loading the RMySQL library and then try to connect to a PostgreSQL database, you may get an error message. This is a known issue with the RMySQL library. Restarting R and then loading the RPostgreSQL library is a workaround.
 
 **Once the connection is set up, we can begin using R code to access information about or in the database.**
 
@@ -156,9 +156,9 @@ for (i in 1:nrow(dbtables)) {
 }
 ```
 
-Note that the syntax for renaming a table is different than that used in MySQL!
+> Note that the SQL syntax for renaming a table is different than that used in MySQL! (see the SQL[i] line in the code above)
 
-To run the same `JOIN` query as in the MySQL example above, the syntax is a bit different:
+To run the same `JOIN` query as in the MySQL example above, the syntax is, again, a bit different:
 
 ```R
 osav_join <- dbGetQuery(conn, 'SELECT * FROM "observer_samples" INNER JOIN "avistajes" ON "observer_samples"."Obs Sample ID" = "avistajes"."Obs Sample ID"')
