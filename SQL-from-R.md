@@ -99,8 +99,7 @@ observer_samples.avistajes <- dbGetQuery(conn, "SELECT * FROM observer_samples J
 # Below is the same join conducted in R using the merge function
 observer_samples.avistajes <- merge(observer_samples, avistajes, by = "Obs.Sample.ID")
 
-# Below is the same join including the necessary syntax forw when the join
-# column is named differently in the two data frames
+# Below is the same join including the necessary syntax for when the join column is named differently in the two data frames
 observer_samples.avistajes <- merge(observer_samples, avistajes, by.x = "Obs.Sample.ID", by.y = "Obs.Sample.ID")
 
 # Note that in the SQL version of the join, you can choose particular fields to come from the left hand table
@@ -165,11 +164,11 @@ dbDisconnect(conn)
 
 * *MySQL uses ' or " to quote values (i.e. WHERE name = "John"). This is not the ANSI standard for databases. `PostgreSQL` uses only single quotes for this (i.e. WHERE name = 'John'). Double quotes are used to quote system identifiers; field names, table names, etc. (i.e. WHERE "last name" = 'Smith').*
 
-* *MySQL uses ` (accent mark or backtick) to quote system identifiers, which is decidedly non-standard.*
+* *MySQL uses ` (the accent mark or backtick) to quote system identifiers, which is decidedly non-standard.*
 * *`PostgreSQL` is case-sensitive for string comparisons. The field "Smith" is not the same as the field "smith". This is a big change for many users from MySQL and other small database systems, like `Microsoft Access`. In `PostgreSQL`, you can either:*
 
 >
-	*  Use the correct case in your query. (i.e. WHERE lname='Smith')
+	* Use the correct case in your query. (i.e. WHERE lname='Smith')
 	* Use a conversion function, like lower() to search. (i.e. WHERE lower(lname)='smith')
 	* Use a case-insensitive operator, like ILIKE or ~*
 
