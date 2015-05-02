@@ -1,6 +1,6 @@
-#Connecting from R to a SQL format relational database
+# Connecting from R to a SQL format relational database
 
-There are several R libraries that all you to connect to SQL databases from R
+There are several R libraries that all allow you to connect to SQL databases from R
 
 ```R
 library(RMySQL)
@@ -10,7 +10,7 @@ library(sqldf)
 ```
 
 
-##MySQL example
+## MySQL example
 
 **Connecting to a MySQL database named `pp` running in a local MAMP installation (localhost, on port 8889)**
 
@@ -32,31 +32,22 @@ dbListTables(conn)
 For SQL queries to work well from R, the table names in MySQL should not have spaces. The routine below reads the list of tables from the database, converts spaces and dashes to underscores, and then runs the SQL command `RENAME` on those tables that whose name should change.
 
 ```R
-dbtables <- list()
-dbtables$original <- dbListTables(conn)
-dbtables$updated <- gsub("[ -]", "_", dbtables$original)
-dbtables <- as.data.frame(dbtables,stringsAsFactors=FALSE)
-dbtables <- dbtables[order(dbtables$original),]
+dbtables <- dbListTables(conn)
 
-dev.null <- apply(dbtables[dbtables$original != dbtables$updated,],1,function(x) {
-	dbSendQuery(conn,paste0('RENAME TABLE `',x['original'],'` TO ',x['updated']))
-})
-```
+# Identify table names that contain spaces or hyphens
+bad.names <- dbtables[grep('[ -]',dbtables)]
 
+for (bad.name in bad.names) {
+	# Replace spaces and hyphens with underscores
+	good.name <- gsub('[ -]','_',bad.name)
 
-<!-- Tony old code
-```
-SQL <- NULL
-for (i in 1:nrow(dbtables)) {
-    dbtables$oldname[i]<- dbExistsTable(conn, as.character(dbtables[i,1]))
-    dbtables$newname[i]<- dbExistsTable(conn, as.character(dbtables[i,2]))
-    if (dbtables$newname[i] == FALSE) {
-        SQL[i]<- paste("RENAME TABLE `", dbtables$original[i],"` TO `", dbtables$updated[i],"`", sep="")
-        dbSendQuery(conn, SQL[i])
-   }
+	# Create and send MySQL RENAME query
+	# The grave accents (`) are included for the special case
+	# in which the original table name contained spaces.
+
+	dbSendQuery(conn,paste0('RENAME TABLE `',bad.name,'` TO ',good.name))
 }
 ```
--->
 
 To create a list of the new table names in MySQL:
 
@@ -64,20 +55,20 @@ To create a list of the new table names in MySQL:
 table.names <- dbListTables(conn)
 
 # ... and this is equivalent, but is not connecting to the MySQL database to produce it
-table.names <- dbtables$updated
+table.names <- gsub('[ -]','_',dbtables)
 ```
 
 To read a table from a MySQL database into R:
 
 ```R
 # Generically...
-# df <- dbReadTable(conn, MySQLTableName)
+# dbReadTable(conn, MySQLTableName)
 
 # So... if there is a table in the MySQL database named "observer_samples"...
-os <- dbReadTable(conn, "observer_samples")
+observer_samples <- dbReadTable(conn, "observer_samples")
 
 # To read in a second table called "avistajes"
-av <- dbReadTable(conn, "avistajes")
+avistajes <- dbReadTable(conn, "avistajes")
 ```
 
 **Joins among related tables**
@@ -85,11 +76,21 @@ av <- dbReadTable(conn, "avistajes")
 In the `pp` database, `observer_samples` and `avistajes` are joined by a primary key-foreign key relationship. The primary key in the `observer_sample` table is used as a foreign key in `avistajes` to link each `avistaje` to a single `observer_sample`. We can build a "join table" with information from `observer_samples` and `avistajes` in two ways, by running a `JOIN` query on the MySQL database from R or by using the `merge` function in R.
 
 ```R
-# Joining via SQL, using WHERE to indicate the field(s) to JOIN on
-osav_join <- dbGetQuery(conn, "SELECT * FROM `observer_samples` JOIN `avistajes` WHERE `observer_samples`.`Obs Sample ID` = `avistajes`.`Obs Sample ID`")
 
-# Joining dataframes in R
-osav_join <- merge(os, av, by = "Obs.Sample.ID")
+# Joining via SQL using the USING syntax
+observer_samples.avistajes <- dbGetQuery(conn, "SELECT * FROM observer_samples JOIN avistajes USING (`Obs Sample ID`)")
+
+# Joining via SQL using the ON syntax
+# This syntax is necessary if the two key columns do not share the same name
+# Table names must precede columns names when column names are not unique among tables.
+observer_samples.avistajes <- dbGetQuery(conn, "SELECT * FROM observer_samples JOIN avistajes ON observer_samples.`Obs Sample ID` = avistajes.`Obs Sample ID`")
+
+# Below is the same join conducted in R using the merge function
+observer_samples.avistajes <- merge(observer_samples, avistajes, by = "Obs.Sample.ID")
+
+# Below is the same join including the necessary syntax forw when the join
+# column is named differently in the two data frames
+observer_samples.avistajes <- merge(observer_samples, avistajes, by.x = "Obs.Sample.ID", by.y = "Obs.Sample.ID")
 
 # Note that in the SQL version of the join, you can choose particular fields to come from the left hand table
 ```
@@ -114,8 +115,7 @@ conn <- dbConnect("PostgreSQL", user = 'ad26693', password = '', host = 'localho
 dbListTables(conn)
 dbtables <- NULL
 dbtables$original <- dbListTables(conn)
-dbtables$updated <- gsub(" ", "_", dbtables$original)
-dbtables$updated <- gsub("-", "_", dbtables$updated)
+dbtables$updated <- gsub("[ -]", "_", dbtables$original)
 dbtables <- as.data.frame(dbtables)
 dbtables <- dbtables[order(dbtables$original),]
 
