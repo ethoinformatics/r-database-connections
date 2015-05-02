@@ -133,7 +133,17 @@ library(RPostgreSQL)
 conn <- dbConnect('PostgreSQL', user = 'ethoguest', password = 'ethoguest', host = '104.236.9.143', port = 5432, dbname='pp')
 ```
 
-> A CAVEAT: If you try to load the RPostgreSQL library in R after previously loading the RMySQL library and then try to connect to a PostgreSQL database, you may get an error message. This is a known issue with the RMySQL library. Restarting R and then loading the RPostgreSQL library is a workaround.
+> A CAVEAT: If you try to load the RPostgreSQL library in R after previously loading the RMySQL library and then try to connect to a PostgreSQL database, you may get an error message. This is a known issue with the RMySQL library and its dependencies. Removing the 'conn' object, detaching the RMySQL library, restarting R, and then loading the RPostgreSQL library is a workaround.
+
+```R
+rm(conn)
+detach("package:RMySQL", unload=TRUE)
+
+# Restart R here. You can do this by pressing Shift-Command-F10 or selecting 'Restart R' under the 'Session' menu in RStudio
+
+library(RPostgreSQL)
+conn <- dbConnect('PostgreSQL', user = 'ethoguest', password = 'ethoguest', host = '104.236.9.143', port = 5432, dbname='pp')
+```
 
 **Once the connection is set up, we can begin using R code to access information about or in the database.**
 
