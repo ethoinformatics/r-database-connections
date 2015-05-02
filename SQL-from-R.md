@@ -123,7 +123,7 @@ Note that the differences from the example above are in the **library**, **conn*
 
 ```R
 library(RPostgreSQL)
-conn <- dbConnect("PostgreSQL", user = 'ad26693', password = '', host = 'localhost', port = 5432, dbname='pp')
+conn <- dbConnect('PostgreSQL', user = 'ad26693', password = '', host = 'localhost', port = 5432, dbname='pp')
 dbListTables(conn)
 dbtables <- NULL
 dbtables$original <- dbListTables(conn)
