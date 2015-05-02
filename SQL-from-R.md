@@ -23,6 +23,14 @@ library(RMySQL)
 conn <- dbConnect(MySQL(), user = 'root', password = 'root', host = 'localhost', unix.socket = '/Applications/MAMP/tmp/mysql/mysql.sock', port = 8889, dbname='pp')
 ```
 
+**Alternatively, we can connect to a MySQL database named `pp` running on a differnt host. For example, to connect to the same database hosted at IP address 104.236.9.143 via the MySQL default communication port # 3306. Here, we specify the name and password of a particular user who has to have read and write privileges on the database (privileges are set up separately).**
+
+```R
+library(RMySQL)
+conn <- dbConnect(MySQL(), user = 'ethouser', password = 'spiderm0nk3y721', host = '104.236.9.143', port = 3306, dbname='pp')
+dbListTables(conn)
+```
+
 To get a list tables in the MySQL database:
 
 ```R
