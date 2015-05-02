@@ -29,7 +29,7 @@ The R code below allows us to connect to the same database hosted in our own san
 
 ```R
 library(RMySQL)
-conn <- dbConnect(MySQL(), user = 'ethouser', password = 'spiderm0nk3y721', host = '104.236.9.143', port = 3306, dbname='pp')
+conn <- dbConnect(MySQL(), user = 'ethoguest', password = 'ethoguest', host = '104.236.9.143', port = 3306, dbname='pp')
 ```
 
 **Once the connection is set up, we can begin using R code to access information about or in the database.**
