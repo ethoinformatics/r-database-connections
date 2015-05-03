@@ -40,7 +40,7 @@ To get a listing of tables in the MySQL database:
 dbListTables(conn)
 ```
 
-For SQL queries to work well from R, the table names in MySQL should not have spaces. The routine below reads the list of tables from the database, converts spaces and dashes to underscores, and then runs the SQL command `RENAME` on those tables that whose name should change.
+For SQL queries to work well from R, the table names in MySQL should not have spaces. The routine below reads the list of tables from the database, converts spaces and dashes to underscores, and then runs the SQL command `RENAME` on those tables whose names should change.
 
 ```R
 dbtables <- dbListTables(conn)
@@ -54,15 +54,17 @@ bad.to.good.names <- function(bad.name) {
 		# strings matching a space or hyphen are replaced with an underscore
 		good.name <- gsub('[ -]','_',bad.name)
 
-		# The bad and good names are separated by "TO". Grave accents or back ticks (`) are included for cases in which
-		# the table name contains special characters or conflicts with a reserved word (e.g., "Time" or "Group")
+		# The bad and good names are separated by "TO". Grave accents or back ticks (`) are included for cases
+		# in which the table name contains special characters or conflicts with a reserved word (e.g., "Time"
+		# or "Group")
 		paste0('`',bad.name,'` TO `',good.name,'`')
 }
 
 # The function above is now applied to each offending table name and returned as an R list using lapply.
 partial.sql.query <- lapply(bad.names,bad.to.good.names)
 
-# The items of the above list are now joined into a vector using the c function and collapsed into a single string using a comma separator.
+# The items of the above list are now joined into a vector using the c function and collapsed into a single
+# string using a comma separator.
 partial.sql.query <- paste(do.call(c, partial.sql.query), collapse=', ')
 
 # The full query can now be assembled by specifying the initial "RENAME TABLE" command
@@ -130,17 +132,17 @@ avistajes <- dbReadTable(conn, 'avistajes')
 
 **Joins among related tables**
 
-In the `pp` database, `observer_samples` and `avistajes` are joined by a primary key-foreign key relationship. The primary key in the `observer_sample` table is used as a foreign key in `avistajes` to link each `avistaje` to a single `observer_sample`. We can build a "join table" with information from `observer_samples` and `avistajes` in two ways, by running a `JOIN` query on the MySQL database from R or by using the `merge` function in R.
+In the `pp` database, `observer_samples` and `avistajes` are joined by a primary key-foreign key relationship. The primary key in the `observer_sample` table is used as a foreign key in `avistajes` to link each `avistaje` to a single `observer_sample`. We can build a "join table" with information from `observer_samples` and `avistajes` in two ways, by running an `INNER JOIN` query on the MySQL database from R or by using the `merge` function in R.
 
 The syntax for a join in SQL looks like this:
 ```SQL
 -- Using the USING syntax
-SELECT * FROM observer_samples JOIN avistajes USING (obs_sample_id);
+SELECT * FROM observer_samples INNER JOIN avistajes USING (obs_sample_id);
 
 -- Using the ON syntax
 -- This syntax is necessary if the two key columns do not share the same name
 -- Table names must precede columns names when column names are not unique among tables.
-SELECT * FROM observer_samples JOIN avistajes ON observer_samples.obs_sample_id = avistajes.obs_sample_id;
+SELECT * FROM observer_samples INNER JOIN avistajes ON observer_samples.obs_sample_id = avistajes.obs_sample_id;
 
 ```
 
@@ -165,7 +167,7 @@ Once queries are completed, close the connection to the database.
 dbDisconnect(conn)
 ```
 
-##`PostgreSQL` EXAMPLE
+##PostgreSQL EXAMPLE
 
 **We can connect to a PostgreSQL database named `pp` stored in a local `Postgres.app` installation...**
 
@@ -173,7 +175,7 @@ First, start your `Postgres.app` installation, then open R and use the code belo
 
 ```R
 library(RPostgreSQL)
-conn <- dbConnect('PostgreSQL', user = 'USERNAME', password = 'PASSWORD', host = 'localhost', port = 5432, dbname='pp')
+conn <- dbConnect('PostgreSQL', user = 'USER', password = 'PASSWORD', host = 'localhost', port = 5432, dbname='pp')
 ```
 
 **Alternatively, we can connect to a PostgreSQL database named `pp` running on a remote host...**
@@ -200,30 +202,65 @@ conn <- dbConnect('PostgreSQL', user = 'ethoguest', password = 'ethoguest', host
 **Once the connection is set up, we can begin using R code to access information about or in the database.**
 
 ```R
-dbListTables(conn)
-dbtables <- NULL
-dbtables$original <- dbListTables(conn)
-dbtables$updated <- gsub("[ -]", "_", dbtables$original)
-dbtables <- as.data.frame(dbtables)
-dbtables <- dbtables[order(dbtables$original),]
+dbtables <- dbListTables(conn)
 
-SQL <- NULL
-for (i in 1:nrow(dbtables)) {
-    dbtables$oldname[i] <- dbExistsTable(conn, as.character(dbtables[i,1]))
-    dbtables$newname[i] <- dbExistsTable(conn, as.character(dbtables[i,2]))
-    if (dbtables$newname[i] == FALSE) {
-        SQL[i]<- paste('ALTER TABLE "', dbtables$original[i],'" RENAME TO "', dbtables$updated[i],'"', sep="")
-       dbSendQuery(conn, SQL[i])
-    }
+# Identify offending table names (those containing spaces or hyphens)
+bad.names <- dbtables[grep('[ -]',dbtables)]
+
+# The function below renames tables
+bad.to.good.names <- function(bad.name) {
+		# strings matching a space or hyphen are replaced with an underscore
+		good.name <- gsub('[ -]','_',bad.name)
+
+		# The bad and good names are separated by "TO". Grave accents or back ticks (`) are included for cases
+		# in which the table name contains special characters or conflicts with a reserved word (e.g., "Time"
+		# or "Group")
+		sql.query <- paste0('ALTER TABLE "',bad.name,'" RENAME TO "',good.name,'"')
+
+		result <- dbSendQuery(conn, sql.query)
 }
+
+# The function above is now applied to each offending table name.
+result <- lapply(bad.names,bad.to.good.names)
+
+# Create an updated listing of table names
+table.names <- dbListTables(conn)
+
+# This function will take a column name and generate the partial SQL syntax for renaming it
+bad.to.good.columns <- function(bad.name) {
+	good.name <- tolower(gsub('[/ -]','_',bad.name))
+	partial.sql.query <- paste0('RENAME COLUMN "',bad.name,'" TO "',good.name,'"')
+	partial.sql.query
+}
+
+# This function will generate all the rename column statements for each table
+rename.columns <- function(table.name) {
+	columns <- dbGetQuery(conn,paste0('SELECT column_name FROM INFORMATION_SCHEMA.COLUMNS WHERE table_name = \'',table.name,'\''))$column_name
+	bad.columns <- columns[grep('[/ -]',columns)]
+	if (length(bad.columns)) {
+		paste0('ALTER TABLE "',table.name,'" ',bad.to.good.columns(bad.columns))
+	} else {
+		character()
+	}
+}
+
+# All SQL queries are now generated and collapsed into a single vector
+sql.queries <- do.call(c,lapply(table.names,rename.columns))
+
+# Finally, go through and execute each SQL query
+for (sql.query in sql.queries) {
+	result <- dbSendQuery(conn, sql.query)
+	dbClearResult(result)
+}
+
 ```
 
-> Note that the SQL syntax for renaming a table is different than that used in MySQL! (see the SQL[i] line in the code above)
+> Note that the SQL syntax for renaming a table is different than that used in MySQL!
 
-To run the same `JOIN` query as in the MySQL example above, the syntax is, again, a bit different:
+To run the same `JOIN` query as in the MySQL example above, the syntax is the same:
 
 ```R
-osav_join <- dbGetQuery(conn, 'SELECT * FROM "observer_samples" INNER JOIN "avistajes" ON "observer_samples"."Obs Sample ID" = "avistajes"."Obs Sample ID"')
+observer_samples.avistajes <- dbGetQuery(conn, 'SELECT * FROM observer_samples INNER JOIN avistajes ON observer_samples.obs_sample_id = avistajes.obs_sample_id')
 ```
 
 Once queries are completed, close the connection to the database.
@@ -232,34 +269,44 @@ Once queries are completed, close the connection to the database.
 dbDisconnect(conn)
 ```
 
-**Note that `PostgreSQL` and MySQL differ in their use of single and double quotes in queries!**
+**Note that PostgreSQL and MySQL differ in their use of single and double quotes in queries!**
 
-####Summary of Some Important Differences Between `PostgreSQL` and MySQL - from this [website](https://wiki.postgresql.org/wiki/Things_to_find_out_about_when_moving_from_MySQL_to_PostgreSQL)
+For instance, below are examples of the same query in MySQL and PostgreSQL. The quotes in these cases are not required, but may be in cases where table names contain special characters or if (in the case of PostgreSQL) uppercase characters are used.
 
-*In general, `PostgreSQL` makes a strong effort to conform to existing database standards, where MySQL has a mixed background on this. If you're coming from a background using MySQL or `Microsoft Access`, some of the changes can seem strange (such as not using double quotes to quote string values).*
+```SQL
+-- MySQL query
+SELECT * FROM `observer_samples` INNER JOIN `avistajes` ON `observer_samples`.`obs_sample_id` = `avistajes`.`obs_sample_id`;
 
-* *MySQL uses nonstandard '#' to begin a comment line; `PostgreSQL` doesn't. Instead, use '--' (double dash), as this is the ANSI standard, and both databases understand it.*
+-- PostgreSQL query
+SELECT * FROM "observer_samples" INNER JOIN "avistajes" ON "observer_samples"."obs_sample_id" = "avistajes"."obs_sample_id";
+```
 
-* *MySQL uses ' or " to quote values (i.e. WHERE name = "John"). This is not the ANSI standard for databases. `PostgreSQL` uses only single quotes for this (i.e. WHERE name = 'John'). Double quotes are used to quote system identifiers; field names, table names, etc. (i.e. WHERE "last name" = 'Smith').*
+####Summary of Some Important Differences Between PostgreSQL and MySQL - from this [website](https://wiki.postgresql.org/wiki/Things_to_find_out_about_when_moving_from_MySQL_to_PostgreSQL)
+
+*In general, PostgreSQL makes a strong effort to conform to existing database standards, where MySQL has a mixed background on this. If you're coming from a background using MySQL or `Microsoft Access`, some of the changes can seem strange (such as not using double quotes to quote string values).*
+
+* *MySQL uses nonstandard '#' to begin a comment line; PostgreSQL doesn't. Instead, use '--' (double dash), as this is the ANSI standard, and both databases understand it.*
+
+* *MySQL uses ' or " to quote values (i.e. WHERE name = "John"). This is not the ANSI standard for databases. PostgreSQL uses only single quotes for this (i.e. WHERE name = 'John'). Double quotes are used to quote system identifiers; field names, table names, etc. (i.e. WHERE "last name" = 'Smith').*
 
 * *MySQL uses ` (the accent mark or backtick) to quote system identifiers, which is decidedly non-standard.*
-* *`PostgreSQL` is case-sensitive for string comparisons. The field "Smith" is not the same as the field "smith". This is a big change for many users from MySQL and other small database systems, like `Microsoft Access`. In `PostgreSQL`, you can either:*
+* *PostgreSQL is case-sensitive for string comparisons. The field "Smith" is not the same as the field "smith". This is a big change for many users from MySQL and other small database systems, like `Microsoft Access`. In PostgreSQL, you can either:*
 
 >
 	* Use the correct case in your query. (i.e. WHERE lname='Smith')
 	* Use a conversion function, like lower() to search. (i.e. WHERE lower(lname)='smith')
 	* Use a case-insensitive operator, like ILIKE or ~*
 
-* *Database, table, field and columns names in `PostgreSQL` are case-independent, unless you created them with double-quotes around their name, in which case they are case-sensitive. In MySQL, table names can be case-sensitive or not, depending on which operating system you are using.*
+* *Database, table, field and columns names in PostgreSQL are case-independent, unless you created them with double-quotes around their name, in which case they are case-sensitive. In MySQL, table names can be case-sensitive or not, depending on which operating system you are using.*
 
-* *`PostgreSQL` and MySQL seem to differ most in handling of dates, and the names of functions that handle dates.*
+* *PostgreSQL and MySQL seem to differ most in handling of dates, and the names of functions that handle dates.*
 
 
 ##`SQLite` EXAMPLE
 
 **Connecting to an `SQLite` database file named `pp.sqlite` on the Desktop in Mac OSX**
 
-Unlike MySQL and `PostgreSQL`, which are server-based databases (though in the examples above, these are set up as locally running servers, i.e., as a "localhost" on a user's own machine, `SQLite` databases are contained in a single file. The R library `RSQLite` allowa easy connection to such databases by using the path to a local copy of the database.
+Unlike MySQL and PostgreSQL, which are server-based databases (though in the examples above, these are set up as locally running servers, i.e., as a "localhost" on a user's own machine, `SQLite` databases are contained in a single file. The R library `RSQLite` allowa easy connection to such databases by using the path to a local copy of the database.
 
 ```R
 library(RSQLite)
@@ -286,9 +333,9 @@ for (i in 1:nrow(dbtables)) {
 
 ```
 
-Note that the syntax for renaming a table (`"ALTER TABLE xxx RENAME TO xxx"`) is that used in `PostgreSQL`.
+Note that the syntax for renaming a table (`"ALTER TABLE xxx RENAME TO xxx"`) is that used in PostgreSQL.
 
-**EITHER** of the `JOIN` queries used above for MySQL or `PostgreSQL` can be used to join two tables from `SQLite`:
+**EITHER** of the `JOIN` queries used above for MySQL or PostgreSQL can be used to join two tables from `SQLite`:
 
 ```R
 osav_join <- dbGetQuery(conn, "SELECT * FROM `observer_samples` JOIN `avistajes` WHERE `observer_samples`.`Obs Sample ID` = `avistajes`.`Obs Sample ID`")
