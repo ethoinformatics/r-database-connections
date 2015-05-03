@@ -54,9 +54,9 @@ bad.to.good.names <- function(bad.name) {
 		# strings matching a space or hyphen are replaced with an underscore
 		good.name <- gsub('[ -]','_',bad.name)
 
-		# The bad and good names are separated by "TO". Grave accents (`) are included for the special case in
-		# which the original table name contained spaces.
-		paste0('`',bad.name,'` TO ',good.name)
+		# The bad and good names are separated by "TO". Grave accents or back ticks (`) are included for cases in which
+		# the table name contains special characters or conflicts with a reserved word (e.g., "Time" or "Group")
+		paste0('`',bad.name,'` TO `',good.name,'`')
 }
 
 # The function above is now applied to each offending table name and returned as an R list using lapply.
@@ -65,16 +65,14 @@ partial.sql.query <- lapply(bad.names,bad.to.good.names)
 # The items of the above list are now joined into a vector using the c function and collapsed into a single string using a comma separator.
 partial.sql.query <- paste(do.call(c, partial.sql.query), collapse=', ')
 
-# The full query can now be assembled by specifying the initial "RENAME TABLE" command and
-# adding punctuation (semicolon)
-sql.query <- paste0('RENAME TABLE ', partial.sql.query, ';')
+# The full query can now be assembled by specifying the initial "RENAME TABLE" command
+sql.query <- paste0('RENAME TABLE ', partial.sql.query)
 
 # Run the below command to check our work so far
 cat(sql.query)
 
 # Finally, run the query using dbSendQuery
-dbSendQuery(conn, sql.query)
-
+result <- dbSendQuery(conn, sql.query)
 ```
 
 The loop below accomplishes the same goal and may be easier to understand, but runs less efficiently.
@@ -83,10 +81,6 @@ The loop below accomplishes the same goal and may be easier to understand, but r
 for (bad.name in bad.names) {
 	# Replace spaces and hyphens with underscores
 	good.name <- gsub('[ -]','_',bad.name)
-
-	# Create and send MySQL RENAME query
-	# The grave accents (`) are included for the special case
-	# in which the original table name contained spaces.
 
 	dbSendQuery(conn,paste0('RENAME TABLE `',bad.name,'` TO ',good.name))
 }
@@ -99,6 +93,25 @@ table.names <- dbListTables(conn)
 
 # ... and this is equivalent, but is not connecting to the MySQL database to produce it
 table.names <- gsub('[ -]','_',dbtables)
+
+```
+
+Just as SQL tables should not include spaces, the columns of each table also should not contain spaces. The following script will cycle through each table and rename offending columns.
+
+```R
+rename.columns <- function(table.name) {
+	columns <- dbGetQuery(conn,paste0('SHOW COLUMNS FROM ',table.name))[,c('Field','Type')]
+	columns$NewField <- tolower(gsub('[/ -]','_',columns$Field))
+	partial.sql.query <- paste(apply(columns,1,function(x) {
+			paste0('CHANGE `',x['Field'],'` `',x['NewField'],'` ',x['Type'])
+	}),collapse=', ')
+	sql.query <- paste('ALTER TABLE',table.name,partial.sql.query)
+	result <- dbSendQuery(conn, sql.query)
+	dbClearResult(result)
+}
+
+results <- lapply(table.names,rename.columns)
+
 ```
 
 To read a table from a MySQL database into R:
@@ -112,15 +125,6 @@ observer_samples <- dbReadTable(conn, 'observer_samples')
 
 # To read in a second table called "avistajes"
 avistajes <- dbReadTable(conn, 'avistajes')
-```
-
-Just as SQL tables should not include spaces, the columns of each table also should not contain spaces. The following script will cycle through each table and rename offending columns.
-
-```R
-
-for (one.table in table.names) {
-
-}
 
 ```
 
@@ -128,21 +132,27 @@ for (one.table in table.names) {
 
 In the `pp` database, `observer_samples` and `avistajes` are joined by a primary key-foreign key relationship. The primary key in the `observer_sample` table is used as a foreign key in `avistajes` to link each `avistaje` to a single `observer_sample`. We can build a "join table" with information from `observer_samples` and `avistajes` in two ways, by running a `JOIN` query on the MySQL database from R or by using the `merge` function in R.
 
+The syntax for a join in SQL looks like this:
+```SQL
+-- Using the USING syntax
+SELECT * FROM observer_samples JOIN avistajes USING (obs_sample_id);
+
+-- Using the ON syntax
+-- This syntax is necessary if the two key columns do not share the same name
+-- Table names must precede columns names when column names are not unique among tables.
+SELECT * FROM observer_samples JOIN avistajes ON observer_samples.obs_sample_id = avistajes.obs_sample_id;
+
+```
+
 ```R
+# Loading a SQL query result into R
+observer_samples.avistajes <- dbGetQuery(conn, "SELECT * FROM observer_samples JOIN avistajes USING (obs_sample_id)")
 
-# Joining via SQL using the USING syntax
-observer_samples.avistajes <- dbGetQuery(conn, "SELECT * FROM observer_samples JOIN avistajes USING (`Obs Sample ID`)")
+# The same join conducted completely in R using the merge function
+observer_samples.avistajes <- merge(observer_samples, avistajes, by = "obs_sample_id")
 
-# Joining via SQL using the ON syntax
-# This syntax is necessary if the two key columns do not share the same name
-# Table names must precede columns names when column names are not unique among tables.
-observer_samples.avistajes <- dbGetQuery(conn, "SELECT * FROM observer_samples JOIN avistajes ON observer_samples.`Obs Sample ID` = avistajes.`Obs Sample ID`")
-
-# Below is the same join conducted in R using the merge function
-observer_samples.avistajes <- merge(observer_samples, avistajes, by = "Obs.Sample.ID")
-
-# Below is the same join including the necessary syntax for when the join column is named differently in the two data frames
-observer_samples.avistajes <- merge(observer_samples, avistajes, by.x = "Obs.Sample.ID", by.y = "Obs.Sample.ID")
+# The same join including the necessary syntax for when the join column is named differently in the two data frames
+observer_samples.avistajes <- merge(observer_samples, avistajes, by.x = "obs_sample_id", by.y = "obs_sample_id")
 
 # Note that in the SQL version of the join, you can choose particular fields to come from the left hand table
 ```
