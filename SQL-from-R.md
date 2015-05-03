@@ -144,6 +144,8 @@ SELECT * FROM observer_samples JOIN avistajes ON observer_samples.obs_sample_id 
 
 ```
 
+Conducting joins using R
+
 ```R
 # Loading a SQL query result into R
 observer_samples.avistajes <- dbGetQuery(conn, "SELECT * FROM observer_samples JOIN avistajes USING (obs_sample_id)")
