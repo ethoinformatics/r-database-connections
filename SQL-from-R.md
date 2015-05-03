@@ -77,8 +77,9 @@ dbSendQuery(conn, sql.query)
 
 ```
 
-<!-- Kenny's old code
-```
+The loop below accomplishes the same goal and may be easier to understand, but runs less efficiently.
+
+```R
 for (bad.name in bad.names) {
 	# Replace spaces and hyphens with underscores
 	good.name <- gsub('[ -]','_',bad.name)
@@ -88,12 +89,8 @@ for (bad.name in bad.names) {
 	# in which the original table name contained spaces.
 
 	dbSendQuery(conn,paste0('RENAME TABLE `',bad.name,'` TO ',good.name))
-	cat(paste0('RENAME TABLE `',bad.name,'` TO ',good.name,'\n'))
-
-	# Note: the function 'paste0()' is equivalent to the function 'paste()' with the argument sep=""
 }
 ```
--->
 
 To create a vector of the new table names in MySQL:
 
