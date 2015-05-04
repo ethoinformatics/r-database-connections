@@ -26,15 +26,15 @@ devtools::install_github("ropensci/sofa")
 library(sofa)
 ```
 
-The function `cushion` lets us connect to `CouchDB`:
+The function `cushion` lets us create a connection to `CouchDB`. To access Couch running locally, we can use the argument type="localhost".
 
 ```R
-cushion(name = 'cdb', user = '', pwd = '', type = "localhost")
+cushion(name = "cdb", user = "", pwd = "", type = "localhost")
 ```
 We can 'ping' Couch to see if it is running...
 
 ```R
-ping()
+ping("cdb")
 ``` 
 
 And we should see something like the following:
@@ -57,10 +57,38 @@ $vendor$name
 [1] "Homebrew"
 ```
 
-The `db_list()` command will show us a new list of databases currently stored in Couch. The "\_replicator" and "\_user" databases are created by default.
+Alternatively, to connect to Couch running on a remote server, set up the cushion() to include a base URL and port and (if necessary) a username and password. To access, for example, the Ethoinformatics sandbox server on Digital Ocean, without administrator privileges, use the following...
 
 ```R
-db_list()
+cushion(name = "cdb", user = "", pwd = "", base = "http://demo.ethoinformatics.org", port=5984)
+ping("cdb")
+
+# or
+
+cushion(name = "cdb", user = "", pwd = "", base = "http://104.236.9.143", port=5984)
+ping("cdb")
+
+$couchdb
+[1] "Welcome"
+
+$uuid
+[1] "7ed0eb1ee93a74c7b573ed24dd00380d"
+
+$version
+[1] "1.6.1"
+
+$vendor
+$vendor$name
+[1] "Ubuntu"
+
+$vendor$version
+[1] "14.04"
+```
+
+The `db_list()` command will show us a new list of databases currently stored in Couch. The "\_replicator" and "\_user" databases are created by default. [If you are accessing Couch on our remote server, you may see other databases here.]
+
+```R
+db_list("cdb")
 
 [1] "_replicator" "_users"
 ```
@@ -68,8 +96,8 @@ db_list()
 We can now make a new database (called `pp`) with the `db_create()` command and then run `db_list()` again:
 
 ```R
-db_create(dbname='pp')
-db_list()
+db_create("cdb", dbname='pp')
+db_list("cdb")
 
 [1] "_replicator" "_users"      "pp"
 ```
@@ -280,7 +308,7 @@ A 'cdb' object can be created with the function `cdbIni()`. The code below allow
 cdb <- cdbIni(serverName="localhost", port=5984)
 ```
 
-Alternatively, to connect to a remote installation, specify the server IP address, the port, and (if necessary) a username and password. To connect to our sandbox server, use the following.
+Alternatively, to connect to a remote installation, specify the server IP address, the port, and (if necessary) a username and password. To connect to the Ethoinformatics sandbox server, without administrator privileges, use the following...
 
 ```R
 cdb <- cdbIni(serverName="demo.ethoinformatics.org", port=5984, uname = "", pwd = "")
