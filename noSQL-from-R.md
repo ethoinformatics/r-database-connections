@@ -10,7 +10,7 @@ The examples below work through using the first two of these libraries for inter
 
 ## To get started with `CouchDB`:
 
-1. Download and install the current version of [CouchDB](http://couchdb.apache.org/) for your operating system. Installation instructions are provided [here](http://docs.couchdb.org/en/1.6.1/install/index.html). The online [documentation](http://127.0.0.1:5984/_utils/docs/) for `CouchDB` is very thorough. For Mac OS, we recommend installing the Apache CouchDB native application. For Windows 8, we recommend using the binary installer and approve that you would like to install `CouchDB` as a service and let it be started automatically after installation.
+1. Download and install the current version of [`CouchDB`](http://couchdb.apache.org/) for your operating system. Installation instructions are provided [here](http://docs.couchdb.org/en/1.6.1/install/index.html). The online [documentation](http://127.0.0.1:5984/_utils/docs/) for `CouchDB` is very thorough. For Mac OS, we recommend installing the Apache CouchDB native application. For Windows 8, we recommend using the binary installer and approve that you would like to install `CouchDB` as a service and let it be started automatically after installation.
 
 2. Start your `CouchDB` application. On Mac OSX this is simply done by double-clicking on the `Apache CouchDB.app`, which should also open a web browser and show you Couch's [**Futon**](http://127.0.0.1:5984/_utils/) utility for creating and administering databases on your local installation (address 127.0.0.1, port 5984). On Windows 8, `CouchDB` should start as a service upon booting.
 
