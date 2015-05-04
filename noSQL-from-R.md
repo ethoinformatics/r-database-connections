@@ -280,14 +280,14 @@ A 'cdb' object can be created with the function `cdbIni()`. The code below allow
 cdb <- cdbIni(serverName="localhost", port=5984)
 ```
 
-Alternatively, to connect to a remote installation, specify the server IP address, the port, and (if necessary) a username and password:
+Alternatively, to connect to a remote installation, specify the server IP address, the port, and (if necessary) a username and password. To connect to our sandbox server, use the following.
 
 ```R
 cdb <- cdbIni(serverName="demo.ethoinformatics.org", port=5984, uname = "", pwd = "")
 
 # or
 
-cdb <- cdbIni(serverName="demo.ethoinformatics.org", port=5984, uname = "", pwd = "")
+cdb <- cdbIni(serverName="104.236.9.143", port=5984, uname = "", pwd = "")
 ```
 
 To list the databases present in `CouchDB`, we use `cdbListDB()`.
