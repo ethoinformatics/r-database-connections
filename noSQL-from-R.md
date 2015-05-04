@@ -119,7 +119,8 @@ We can add all of the records in "diary.text" to the `pp` Couch database as foll
 ```R
 for (i in 1:nrow(d)){
 		doc <- as.list(d[i,]) 
-		doc_create(doc,dbname="pp",docid = doc$eventID)
+		doc_create(doc, cushion="cdb", dbname="pp", docid = doc$eventID)
+		# note that you really do not need to specify the cushion name if it has already been set
 	}
 ```
 
@@ -127,7 +128,8 @@ We can read these out of `CouchDB` by using `doc_get()` and specifying their Cou
 
 ```R
 for (i in d$eventID) {
-		res <- doc_get(dbname="pp", docid=i)
+		res <- doc_get(cushion="cdb", dbname="pp", docid=i)
+		# note that you really do not need to specify the cushion name if it has already been set
 		res
 	}
 ```
@@ -137,7 +139,9 @@ To update a particular document in `CouchDB`, use `doc_update()`. Here, we updat
 First, we retrieve the doc of interest...
 
 ```R 
-res <- doc_get(dbname="pp", docid="OS17016")
+res <- doc_get(cushion="cdb", dbname="pp", docid="OS17016")
+# again, cushion need not be specified if already set
+# in functions below, we will leave this argument out
 ```
  
 Then, retrieve the revision numbers and ids
