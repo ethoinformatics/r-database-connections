@@ -2,9 +2,11 @@
 
 There are several packages for `R` that let you connect to document-based "noSQL" databases, including `CouchDB` and `MongoDB`. The EthoCore project is recommending (for the time being) Apache's open source `CouchDB` as a noSQL database format for storing and transferring EthoCore documents. The format for `CouchDB` documents is simply JSON ("JavaScript Object Notation") structured text files. The following `R` libraries allow users to connect with sets of `CouchDB` databases.
 
-- library(couchDB)
 - library(sofa)
 - library(R4CouchDB)
+- library(couchDB)
+
+The examples below work through using the first two of these libraries for interfacing with `CouchDB`. The `R` libraries _RMongo_ and _rmonogodb_ allow for similar interfacing with `MongoDB`. 
 
 ## To get started with `CouchDB`:
 
