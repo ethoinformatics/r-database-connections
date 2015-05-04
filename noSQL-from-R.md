@@ -273,11 +273,21 @@ library(R4CouchDB)
 
 All **R4CouchDB** functions take as their argument a 'cdb' object, which is an `R` list containing both information about the connection set up to CouchDB and the data being passed back and forth. The "information" part of this object is like the "cushion" object used by the **sofa** library.
 
-A 'cdb' object can be created with the function `cdbIni()`
+A 'cdb' object can be created with the function `cdbIni()`. The code below allows you to connect to a local installation of Couch.
 
 ```R
 # initiates connection with localhost on port 5984
 cdb <- cdbIni(serverName="localhost", port=5984)
+```
+
+Alternatively, to connect to a remote installation, specify the server IP address, the port, and (if necessary) a username and password:
+
+```R
+cdb <- cdbIni(serverName="demo.ethoinformatics.org", port=5984, uname = "", pwd = "")
+
+# or
+
+cdb <- cdbIni(serverName="demo.ethoinformatics.org", port=5984, uname = "", pwd = "")
 ```
 
 To list the databases present in `CouchDB`, we use `cdbListDB()`.
