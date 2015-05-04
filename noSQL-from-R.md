@@ -26,7 +26,7 @@ devtools::install_github("ropensci/sofa")
 library(sofa)
 ```
 
-The function `cushion` lets us create a connection to `CouchDB`. To access Couch running locally, we can use the argument type="localhost".
+The function `cushion` lets us create a connection to `CouchDB`. [Get it? "`CouchDB`, `sofa`, `cushion`?] To access Couch running locally, we can use the argument type="localhost".
 
 ```R
 cushion(name = "cdb", user = "", pwd = "", type = "localhost")
@@ -57,7 +57,7 @@ $vendor$name
 [1] "Homebrew"
 ```
 
-Alternatively, to connect to Couch running on a remote server, set up the cushion() to include a base URL and port and (if necessary) a username and password. To access, for example, the Ethoinformatics sandbox server on Digital Ocean, without administrator privileges, use the following...
+Alternatively, to connect to Couch running on a remote server, set up `cushion()` to include a base URL and port and (if necessary) a username and password. To access, for example, the Ethoinformatics sandbox server, without administrator privileges, use the following...
 
 ```R
 cushion(name = "cdb", user = "", pwd = "", base = "http://demo.ethoinformatics.org", port=5984)
