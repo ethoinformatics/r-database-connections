@@ -46,13 +46,13 @@ For SQL queries to work well from R, the table names in MySQL should not have sp
 dbtables <- dbListTables(conn)
 
 # Identify offending table names (those containing spaces or hyphens)
-bad.names <- dbtables[grep('[ -]',dbtables)]
+bad.names <- dbtables[grep('[A-Z -]',dbtables)]
 
 # The function below generates the partial SQL syntax for renaming
 # a single offending table name
 bad.to.good.names <- function(bad.name) {
 		# strings matching a space or hyphen are replaced with an underscore
-		good.name <- gsub('[ -]','_',bad.name)
+		good.name <- tolower(gsub('[ -]','_',bad.name))
 
 		# The bad and good names are separated by "TO". Grave accents or back ticks (`) are included for cases
 		# in which the table name contains special characters or conflicts with a reserved word (e.g., "Time"
@@ -82,7 +82,7 @@ The loop below accomplishes the same goal and may be easier to understand, but r
 ```R
 for (bad.name in bad.names) {
 	# Replace spaces and hyphens with underscores
-	good.name <- gsub('[ -]','_',bad.name)
+	good.name <- tolower(gsub('[ -]','_',bad.name))
 
 	dbSendQuery(conn,paste0('RENAME TABLE `',bad.name,'` TO ',good.name))
 }
@@ -94,7 +94,7 @@ To create a vector of the new table names in MySQL:
 table.names <- dbListTables(conn)
 
 # ... and this is equivalent, but is not connecting to the MySQL database to produce it
-table.names <- gsub('[ -]','_',dbtables)
+table.names <- tolower(gsub('[ -]','_',dbtables))
 
 ```
 
@@ -205,12 +205,12 @@ conn <- dbConnect('PostgreSQL', user = 'ethoguest', password = 'ethoguest', host
 dbtables <- dbListTables(conn)
 
 # Identify offending table names (those containing spaces or hyphens)
-bad.names <- dbtables[grep('[ -]',dbtables)]
+bad.names <- dbtables[grep('[A-Z -]',dbtables)]
 
 # The function below renames tables
 bad.to.good.names <- function(bad.name) {
 		# strings matching a space or hyphen are replaced with an underscore
-		good.name <- gsub('[ -]','_',bad.name)
+		good.name <- tolower(gsub('[ -]','_',bad.name))
 
 		# The bad and good names are separated by "TO". Grave accents or back ticks (`) are included for cases
 		# in which the table name contains special characters or conflicts with a reserved word (e.g., "Time"
@@ -313,22 +313,55 @@ library(RSQLite)
 path <- "~/Desktop/pp.sqlite"
 conn <- dbConnect(SQLite(),dbname = path)
 
-dbListTables(conn)
-dbtables <- NULL
-dbtables$original <- dbListTables(conn)
-dbtables$updated <- gsub(" ", "_", dbtables$original)
-dbtables$updated <- gsub("-", "_", dbtables$updated)
-dbtables <- as.data.frame(dbtables)
-dbtables <- dbtables[order(dbtables$original),]
+dbtables <- dbListTables(conn)
 
-SQL <- NULL
-for (i in 1:nrow(dbtables)) {
-    dbtables$oldname[i] <- dbExistsTable(conn, as.character(dbtables[i,1]))
-    dbtables$newname[i] <- dbExistsTable(conn, as.character(dbtables[i,2]))
-    if (dbtables$newname[i] == FALSE) {
-        SQL[i]<- paste('ALTER TABLE "', dbtables$original[i],'" RENAME TO "', dbtables$updated[i],'"', sep="")
-       dbSendQuery(conn, SQL[i])
-    }
+# Identify offending table names (those containing spaces or hyphens)
+bad.names <- dbtables[grep('[A-Z -]',dbtables)]
+
+# The function below renames tables
+bad.to.good.names <- function(bad.name) {
+		# strings matching a space or hyphen are replaced with an underscore
+		good.name <- tolower(gsub('[ -]','_',bad.name))
+
+		# The bad and good names are separated by "TO". Grave accents or back ticks (`) are included for cases
+		# in which the table name contains special characters or conflicts with a reserved word (e.g., "Time"
+		# or "Group")
+		sql.query <- paste0('ALTER TABLE "',bad.name,'" RENAME TO "',good.name,'"')
+
+		result <- dbSendQuery(conn, sql.query)
+}
+
+# The function above is now applied to each offending table name.
+result <- lapply(bad.names,bad.to.good.names)
+
+# Create an updated listing of table names
+table.names <- dbListTables(conn)
+
+# This function will take a column name and generate the partial SQL syntax for renaming it
+bad.to.good.columns <- function(bad.name) {
+	good.name <- tolower(gsub('[/ -]','_',bad.name))
+	partial.sql.query <- paste0('RENAME COLUMN "',bad.name,'" TO "',good.name,'"')
+	partial.sql.query
+}
+
+# This function will generate all the rename column statements for each table
+rename.columns <- function(table.name) {
+	columns <- dbGetQuery(conn,paste0('SELECT column_name FROM INFORMATION_SCHEMA.COLUMNS WHERE table_name = \'',table.name,'\''))$column_name
+	bad.columns <- columns[grep('[/ -]',columns)]
+	if (length(bad.columns)) {
+		paste0('ALTER TABLE "',table.name,'" ',bad.to.good.columns(bad.columns))
+	} else {
+		character()
+	}
+}
+
+# All SQL queries are now generated and collapsed into a single vector
+sql.queries <- do.call(c,lapply(table.names,rename.columns))
+
+# Finally, go through and execute each SQL query
+for (sql.query in sql.queries) {
+	result <- dbSendQuery(conn, sql.query)
+	dbClearResult(result)
 }
 
 ```
@@ -338,7 +371,7 @@ Note that the syntax for renaming a table (`"ALTER TABLE xxx RENAME TO xxx"`) is
 **EITHER** of the `JOIN` queries used above for MySQL or PostgreSQL can be used to join two tables from `SQLite`:
 
 ```R
-osav_join <- dbGetQuery(conn, "SELECT * FROM `observer_samples` JOIN `avistajes` WHERE `observer_samples`.`Obs Sample ID` = `avistajes`.`Obs Sample ID`")
+osav_join <- dbGetQuery(conn, 'SELECT * FROM `observer_samples` INNER JOIN `avistajes` ON `observer_samples`.`Obs Sample ID` = `avistajes`.`Obs Sample ID`')
 
 osav_join <- dbGetQuery(conn, 'SELECT * FROM "observer_samples" INNER JOIN "avistajes" ON "observer_samples"."Obs Sample ID" = "avistajes"."Obs Sample ID"')
 ```
