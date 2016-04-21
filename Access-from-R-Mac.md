@@ -94,7 +94,7 @@ This installs a set of lib files into `/usr/local/lib` and the necessary mdbtool
 [DOCUMENTATION](http://cran.r-project.org/web/packages/Hmisc/Hmisc.pdf) for `Hmisc`
 
 ```R
-install.package("Hmisc")
+install.packages("Hmisc")
 library(Hmisc)
 ```
 
