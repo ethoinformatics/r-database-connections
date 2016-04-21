@@ -12,7 +12,7 @@
 [DOCUMENTATION](http://cran.r-project.org/web/packages/RODBC/RODBC.pdf) for `RODBC`
 
 ```R
-install.package("RODBC")
+install.packages("RODBC")
 library(RODBC)
 ```
 
