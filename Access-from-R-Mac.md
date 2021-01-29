@@ -1,4 +1,4 @@
-#Connect to an `Microsoft Access` *.mdb database from `R` on Mac OSX
+# Connect to an `Microsoft Access` *.mdb database from `R` on Mac OSX
 
 ## 1. Install [homebrew](http://brew.sh/)
 
@@ -104,7 +104,7 @@ library(Hmisc)
 mdb.get(filename)
 ```
 
-###EXAMPLE
+### EXAMPLE
 
 The following example R script lets you connect to a database named `test.mdb` located on the desktop. Note: the name of your database cannot have spaces in it.
 
@@ -131,7 +131,7 @@ db <- mdb.get(filename, tables=c('observer','contacts')
 
 Note that the function `mdb.get` reads the data in the tables as CSV data. It can deal with carriage returns in text fields in the database and reads these as newline characters.
 
-###HELPFUL LINKS
+### HELPFUL LINKS
 [Read data from MS Access into R] (http://web.stanford.edu/~cengel/cgi-bin/anthrospace/mdb-tools-for-mac-105/comment-page-1)
 
 [MDB Tools Info](http://mdbtools.sourceforge.net/)
