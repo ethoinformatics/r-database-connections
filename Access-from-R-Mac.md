@@ -3,12 +3,11 @@
 ## 1. Install [homebrew](http://brew.sh/)
 
 ```{bash}
-ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 brew install wget
 ```
 
-Homebrew installs packages to their own directory inside `/usr/local/Cellar` and then symlinks their files into `/usr/local`
+Homebrew installs packages to their own directory inside `/usr/local/Cellar` and then symlinks their files into `/usr/local/bin`
 
 ## 2. Install and compile [mdbtools](http://github.com/brianb/mdbtools)
 
