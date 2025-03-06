@@ -2,8 +2,9 @@
 
 ## 1. Install [homebrew](http://brew.sh/)
 
-```bash
+```{bash}
 ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 brew install wget
 ```
 
